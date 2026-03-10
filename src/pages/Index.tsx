@@ -3,6 +3,8 @@ import { loadLexicon, findWord, addWord, WordEntry } from "@/lib/lexicon";
 import UnifiedInput from "@/components/UnifiedInput";
 import WordDisplay from "@/components/WordDisplay";
 import WordBrowser from "@/components/WordBrowser";
+import WordList from "@/components/WordList";
+import { List, BookOpen } from "lucide-react";
 
 type View = "idle" | "found" | "new-word" | "imprint" | "browse";
 
@@ -13,8 +15,8 @@ const Index = () => {
   const [foundEntry, setFoundEntry] = useState<WordEntry | null>(null);
   const [imprintEntry, setImprintEntry] = useState<WordEntry | null>(null);
   const [browseIndex, setBrowseIndex] = useState(0);
+  const [listMode, setListMode] = useState(false);
 
-  // Start in browse mode if lexicon has entries
   useEffect(() => {
     if (lexicon.length > 0 && view === "idle" && !query.trim()) {
       setView("browse");
@@ -52,7 +54,7 @@ const Index = () => {
       setLexicon(updated);
       setImprintEntry(entry);
       setView("imprint");
-      // Return to browse after the imprint moment
+      setListMode(false);
       setTimeout(() => {
         setImprintEntry(null);
         setView("browse");
@@ -62,8 +64,31 @@ const Index = () => {
     [lexicon]
   );
 
+  const handleSelectFromList = (entry: WordEntry) => {
+    setFoundEntry(entry);
+    setView("found");
+    setQuery(entry.word);
+    setListMode(false);
+  };
+
+  const showToggle = lexicon.length > 0 && (view === "browse" || (view === "browse" && listMode));
+  const isBrowsing = view === "browse" || (listMode && view !== "imprint" && view !== "found" && view !== "new-word");
+
   return (
     <div className="flex flex-col h-screen bg-background select-none">
+      {/* Toggle button */}
+      {lexicon.length > 0 && view !== "imprint" && view !== "found" && view !== "new-word" && (
+        <div className="flex justify-end px-6 pt-4">
+          <button
+            onClick={() => setListMode(!listMode)}
+            className="text-muted-foreground hover:text-foreground transition-colors p-2"
+            aria-label={listMode ? "Card view" : "List view"}
+          >
+            {listMode ? <BookOpen size={18} /> : <List size={18} />}
+          </button>
+        </div>
+      )}
+
       {/* Title - only shown when idle with empty lexicon */}
       {view === "idle" && lexicon.length === 0 && (
         <div className="flex flex-col items-center justify-center flex-1 px-6">
@@ -99,13 +124,17 @@ const Index = () => {
         </div>
       )}
 
-      {/* Browse mode */}
-      {view === "browse" && (
+      {/* Browse mode - card or list */}
+      {view === "browse" && !listMode && (
         <WordBrowser
           entries={lexicon}
           currentIndex={browseIndex}
           onNavigate={setBrowseIndex}
         />
+      )}
+
+      {view === "browse" && listMode && (
+        <WordList entries={lexicon} onSelect={handleSelectFromList} />
       )}
 
       {/* Unified input — hidden during imprint */}
