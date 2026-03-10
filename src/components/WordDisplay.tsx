@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { WordEntry } from "@/lib/lexicon";
 import { Pencil } from "lucide-react";
 
@@ -11,6 +11,11 @@ interface WordDisplayProps {
 export default function WordDisplay({ entry, isNew, onEdit }: WordDisplayProps) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(entry.definition);
+
+  useEffect(() => {
+    setDraft(entry.definition);
+    setEditing(false);
+  }, [entry.word]);
 
   const handleSave = () => {
     const trimmed = draft.trim();
