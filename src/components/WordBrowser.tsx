@@ -6,6 +6,7 @@ interface WordBrowserProps {
   entries: WordEntry[];
   currentIndex: number;
   onNavigate: (index: number) => void;
+  onEdit?: (word: string, newDefinition: string) => void;
 }
 
 export default function WordBrowser({ entries, currentIndex, onNavigate }: WordBrowserProps) {
