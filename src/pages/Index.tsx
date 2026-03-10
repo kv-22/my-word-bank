@@ -71,8 +71,7 @@ const Index = () => {
     setListMode(false);
   };
 
-  const showToggle = lexicon.length > 0 && (view === "browse" || (view === "browse" && listMode));
-  const isBrowsing = view === "browse" || (listMode && view !== "imprint" && view !== "found" && view !== "new-word");
+  const showToggle = view === "browse" && lexicon.length > 0;
 
   return (
     <div className="flex flex-col h-screen bg-background select-none">
