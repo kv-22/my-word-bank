@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
-import { loadLexicon, findWord, addWord, WordEntry } from "@/lib/lexicon";
+import { loadLexicon, findWord, addWord, updateDefinition, WordEntry } from "@/lib/lexicon";
 import UnifiedInput from "@/components/UnifiedInput";
 import WordDisplay from "@/components/WordDisplay";
 import WordBrowser from "@/components/WordBrowser";
