@@ -4,6 +4,7 @@ interface UnifiedInputProps {
   onSearch: (query: string) => void;
   onSave: (word: string, definition: string) => void;
   showDefinitionInput: boolean;
+  wordFound: boolean;
   query: string;
   setQuery: (q: string) => void;
 }
@@ -12,6 +13,7 @@ export default function UnifiedInput({
   onSearch,
   onSave,
   showDefinitionInput,
+  wordFound,
   query,
   setQuery,
 }: UnifiedInputProps) {
@@ -83,7 +85,7 @@ export default function UnifiedInput({
           placeholder="Type a word"
           className="flex-1 bg-transparent font-display text-2xl sm:text-3xl text-foreground placeholder:text-muted-foreground/40 focus:outline-none caret-accent"
         />
-        {query.trim() && !showDefinitionInput && (
+        {query.trim() && !showDefinitionInput && !wordFound && (
           <span className="font-body tracking-ui text-muted-foreground ml-4 shrink-0">
             Not in lexicon
           </span>

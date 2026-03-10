@@ -116,6 +116,7 @@ const Index = () => {
           onSearch={handleSearch}
           onSave={handleSave}
           showDefinitionInput={view === "new-word"}
+          wordFound={view === "found"}
         />
       )}
     </div>
