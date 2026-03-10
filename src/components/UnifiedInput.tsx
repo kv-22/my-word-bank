@@ -13,6 +13,7 @@ export default function UnifiedInput({
   onSearch,
   onSave,
   showDefinitionInput,
+  wordFound,
   query,
   setQuery,
 }: UnifiedInputProps) {
