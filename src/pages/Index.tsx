@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
-import { loadLexicon, findWord, addWord, WordEntry } from "@/lib/lexicon";
+import { loadLexicon, findWord, addWord, updateDefinition, WordEntry } from "@/lib/lexicon";
 import UnifiedInput from "@/components/UnifiedInput";
 import WordDisplay from "@/components/WordDisplay";
 import WordBrowser from "@/components/WordBrowser";
@@ -71,6 +71,18 @@ const Index = () => {
     setListMode(false);
   };
 
+  const handleEdit = useCallback(
+    (word: string, newDefinition: string) => {
+      const updated = updateDefinition(lexicon, word, newDefinition);
+      setLexicon(updated);
+      // Update foundEntry if currently viewing it
+      if (foundEntry && foundEntry.word.toLowerCase() === word.toLowerCase()) {
+        setFoundEntry({ ...foundEntry, definition: newDefinition });
+      }
+    },
+    [lexicon, foundEntry]
+  );
+
   const showToggle = view === "browse" && lexicon.length > 0;
 
   return (
@@ -114,7 +126,7 @@ const Index = () => {
           >
             ← Back
           </button>
-          <WordDisplay entry={foundEntry} />
+          <WordDisplay entry={foundEntry} onEdit={handleEdit} />
         </div>
       )}
 
@@ -140,6 +152,7 @@ const Index = () => {
           entries={lexicon}
           currentIndex={browseIndex}
           onNavigate={setBrowseIndex}
+          onEdit={handleEdit}
         />
       )}
 

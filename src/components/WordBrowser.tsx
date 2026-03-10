@@ -6,9 +6,10 @@ interface WordBrowserProps {
   entries: WordEntry[];
   currentIndex: number;
   onNavigate: (index: number) => void;
+  onEdit?: (word: string, newDefinition: string) => void;
 }
 
-export default function WordBrowser({ entries, currentIndex, onNavigate }: WordBrowserProps) {
+export default function WordBrowser({ entries, currentIndex, onNavigate, onEdit }: WordBrowserProps) {
   if (entries.length === 0) return null;
 
   const entry = entries[currentIndex];
@@ -26,7 +27,7 @@ export default function WordBrowser({ entries, currentIndex, onNavigate }: WordB
         </button>
       )}
 
-      <WordDisplay entry={entry} />
+      <WordDisplay entry={entry} onEdit={onEdit} />
 
       {entries.length > 1 && (
         <button

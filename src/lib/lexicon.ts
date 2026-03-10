@@ -37,6 +37,14 @@ export function addWord(entries: WordEntry[], entry: WordEntry): WordEntry[] {
   return updated;
 }
 
+export function updateDefinition(entries: WordEntry[], word: string, newDefinition: string): WordEntry[] {
+  const updated = entries.map(e =>
+    e.word.toLowerCase() === word.toLowerCase() ? { ...e, definition: newDefinition } : e
+  );
+  saveLexicon(updated);
+  return updated;
+}
+
 export function deleteWord(entries: WordEntry[], word: string): WordEntry[] {
   const updated = entries.filter(e => e.word.toLowerCase() !== word.toLowerCase());
   saveLexicon(updated);
