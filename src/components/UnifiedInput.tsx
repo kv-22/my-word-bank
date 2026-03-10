@@ -19,11 +19,7 @@ export default function UnifiedInput({
   const defRef = useRef<HTMLTextAreaElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    if (showDefinitionInput && defRef.current) {
-      defRef.current.focus();
-    }
-  }, [showDefinitionInput]);
+  // No auto-focus on definition input — user navigates manually
 
   useEffect(() => {
     inputRef.current?.focus();
