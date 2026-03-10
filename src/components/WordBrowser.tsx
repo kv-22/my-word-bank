@@ -27,7 +27,7 @@ export default function WordBrowser({ entries, currentIndex, onNavigate, onEdit 
         </button>
       )}
 
-      <WordDisplay entry={entry} />
+      <WordDisplay entry={entry} onEdit={onEdit} />
 
       {entries.length > 1 && (
         <button
