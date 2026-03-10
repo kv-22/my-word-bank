@@ -126,7 +126,7 @@ const Index = () => {
           >
             ← Back
           </button>
-          <WordDisplay entry={foundEntry} />
+          <WordDisplay entry={foundEntry} onEdit={handleEdit} />
         </div>
       )}
 
