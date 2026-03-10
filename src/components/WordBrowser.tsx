@@ -9,7 +9,7 @@ interface WordBrowserProps {
   onEdit?: (word: string, newDefinition: string) => void;
 }
 
-export default function WordBrowser({ entries, currentIndex, onNavigate }: WordBrowserProps) {
+export default function WordBrowser({ entries, currentIndex, onNavigate, onEdit }: WordBrowserProps) {
   if (entries.length === 0) return null;
 
   const entry = entries[currentIndex];
