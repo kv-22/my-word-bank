@@ -71,6 +71,18 @@ const Index = () => {
     setListMode(false);
   };
 
+  const handleEdit = useCallback(
+    (word: string, newDefinition: string) => {
+      const updated = updateDefinition(lexicon, word, newDefinition);
+      setLexicon(updated);
+      // Update foundEntry if currently viewing it
+      if (foundEntry && foundEntry.word.toLowerCase() === word.toLowerCase()) {
+        setFoundEntry({ ...foundEntry, definition: newDefinition });
+      }
+    },
+    [lexicon, foundEntry]
+  );
+
   const showToggle = view === "browse" && lexicon.length > 0;
 
   return (
