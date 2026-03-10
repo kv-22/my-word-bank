@@ -152,6 +152,7 @@ const Index = () => {
           entries={lexicon}
           currentIndex={browseIndex}
           onNavigate={setBrowseIndex}
+          onEdit={handleEdit}
         />
       )}
 
