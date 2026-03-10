@@ -108,6 +108,7 @@ const Index = () => {
               setView("browse");
               setQuery("");
               setFoundEntry(null);
+              setListMode(true);
             }}
             className="absolute top-4 left-6 font-body tracking-ui text-muted-foreground hover:text-foreground transition-colors"
           >
