@@ -102,7 +102,17 @@ const Index = () => {
 
       {/* Found word display */}
       {view === "found" && foundEntry && (
-        <div className="flex items-center justify-center flex-1">
+        <div className="flex items-center justify-center flex-1 relative">
+          <button
+            onClick={() => {
+              setView("browse");
+              setQuery("");
+              setFoundEntry(null);
+            }}
+            className="absolute top-4 left-6 font-body tracking-ui text-muted-foreground hover:text-foreground transition-colors"
+          >
+            ← Back
+          </button>
           <WordDisplay entry={foundEntry} />
         </div>
       )}
