@@ -103,12 +103,14 @@ const Index = () => {
       {/* Title - only shown when idle with empty lexicon */}
       {view === "idle" && lexicon.length === 0 && (
         <div className="flex flex-col items-center justify-center flex-1 px-6">
+          <div className="w-16 h-1 bg-primary rounded-full mb-8" />
           <h1 className="font-display text-4xl sm:text-6xl font-bold text-foreground text-center">
             Ostracon
           </h1>
-          <p className="mt-4 font-body tracking-ui text-muted-foreground">
+          <p className="mt-4 font-body tracking-ui text-secondary">
             Your personal lexicon
           </p>
+          <div className="w-16 h-1 bg-primary/30 rounded-full mt-8" />
         </div>
       )}
 
