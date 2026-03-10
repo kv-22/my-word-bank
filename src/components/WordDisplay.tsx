@@ -12,6 +12,11 @@ export default function WordDisplay({ entry, isNew, onEdit }: WordDisplayProps) 
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(entry.definition);
 
+  useEffect(() => {
+    setDraft(entry.definition);
+    setEditing(false);
+  }, [entry.word]);
+
   const handleSave = () => {
     const trimmed = draft.trim();
     if (!trimmed || !onEdit) return;
