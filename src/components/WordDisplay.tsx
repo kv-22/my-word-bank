@@ -83,7 +83,7 @@ export default function WordDisplay({ entry, isNew, onEdit }: WordDisplayProps) 
           {onEdit && !isNew && (
             <button
               onClick={() => setEditing(true)}
-              className="mt-3 inline-flex items-center gap-1.5 font-body tracking-ui text-muted-foreground hover:text-foreground transition-colors"
+              className="mt-3 inline-flex items-center gap-1.5 font-body tracking-ui text-secondary hover:text-primary transition-colors"
             >
               <Pencil size={12} />
               Edit
