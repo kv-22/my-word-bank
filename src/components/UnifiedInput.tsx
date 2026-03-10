@@ -4,6 +4,7 @@ interface UnifiedInputProps {
   onSearch: (query: string) => void;
   onSave: (word: string, definition: string) => void;
   showDefinitionInput: boolean;
+  wordFound: boolean;
   query: string;
   setQuery: (q: string) => void;
 }
