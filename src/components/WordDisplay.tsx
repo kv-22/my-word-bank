@@ -31,6 +31,7 @@ export default function WordDisplay({ entry, isNew, onEdit }: WordDisplayProps) 
 
   return (
     <div className="flex flex-col items-center justify-center text-center px-6">
+      <div className="w-12 h-1 bg-primary/30 rounded-full mb-6" />
       <h1
         className={`font-display text-5xl sm:text-7xl md:text-8xl font-bold text-foreground leading-tight ${
           isNew ? "animate-ink-soak" : ""
@@ -82,7 +83,7 @@ export default function WordDisplay({ entry, isNew, onEdit }: WordDisplayProps) 
           {onEdit && !isNew && (
             <button
               onClick={() => setEditing(true)}
-              className="mt-3 inline-flex items-center gap-1.5 font-body tracking-ui text-muted-foreground hover:text-foreground transition-colors"
+              className="mt-3 inline-flex items-center gap-1.5 font-body tracking-ui text-secondary hover:text-primary transition-colors"
             >
               <Pencil size={12} />
               Edit

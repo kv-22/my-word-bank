@@ -22,16 +22,16 @@ export default function WordList({ entries, onSelect }: WordListProps) {
     <div className="flex-1 overflow-y-auto px-6 py-8">
       {Object.entries(groups).map(([letter, words]) => (
         <div key={letter} className="mb-8">
-          <h2 className="font-display text-3xl font-bold text-foreground/20 mb-4">
+          <h2 className="font-display text-3xl font-bold text-primary/30 mb-4">
             {letter}
           </h2>
           {words.map((entry) => (
             <button
               key={entry.word}
               onClick={() => onSelect(entry)}
-              className="block w-full text-left py-3 border-b border-border last:border-b-0 group"
+              className="block w-full text-left py-3 border-b border-border last:border-b-0 group hover:bg-card rounded-sm transition-colors px-2 -mx-2"
             >
-              <span className="font-display text-xl text-foreground group-hover:text-accent transition-colors">
+              <span className="font-display text-xl text-foreground group-hover:text-primary transition-colors">
                 {entry.word}
               </span>
               <span className="block font-body text-sm text-muted-foreground mt-1 leading-relaxed">
