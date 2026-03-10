@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { WordEntry } from "@/lib/lexicon";
 import { Pencil } from "lucide-react";
 
