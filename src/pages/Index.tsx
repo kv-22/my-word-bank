@@ -1,26 +1,31 @@
 import { useState, useCallback, useEffect } from "react";
 import { loadLexicon, findWord, addWord, updateDefinition, WordEntry } from "@/lib/lexicon";
+import { useAuth } from "@/contexts/AuthContext";
 import UnifiedInput from "@/components/UnifiedInput";
 import WordDisplay from "@/components/WordDisplay";
 import WordBrowser from "@/components/WordBrowser";
 import WordList from "@/components/WordList";
-import { List, BookOpen } from "lucide-react";
+import { List, BookOpen, LogOut } from "lucide-react";
 
 type View = "idle" | "found" | "new-word" | "imprint" | "browse";
 
 const Index = () => {
-  const [lexicon, setLexicon] = useState<WordEntry[]>(() => loadLexicon());
+  const { user, signOut } = useAuth();
+  const [lexicon, setLexicon] = useState<WordEntry[]>([]);
   const [query, setQuery] = useState("");
   const [view, setView] = useState<View>("idle");
   const [foundEntry, setFoundEntry] = useState<WordEntry | null>(null);
   const [imprintEntry, setImprintEntry] = useState<WordEntry | null>(null);
   const [browseIndex, setBrowseIndex] = useState(0);
   const [listMode, setListMode] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (lexicon.length > 0 && view === "idle" && !query.trim()) {
-      setView("browse");
-    }
+    loadLexicon().then((entries) => {
+      setLexicon(entries);
+      setLoading(false);
+      if (entries.length > 0) setView("browse");
+    });
   }, []);
 
   const handleSearch = useCallback(
@@ -44,14 +49,12 @@ const Index = () => {
   );
 
   const handleSave = useCallback(
-    (word: string, definition: string) => {
-      const entry: WordEntry = {
-        word,
-        definition,
-        createdAt: Date.now(),
-      };
-      const updated = addWord(lexicon, entry);
-      setLexicon(updated);
+    async (word: string, definition: string) => {
+      if (!user) return;
+      const entry = await addWord(user.id, word, definition);
+      if (!entry) return;
+
+      setLexicon((prev) => [entry, ...prev.filter((e) => e.word.toLowerCase() !== word.toLowerCase())]);
       setImprintEntry(entry);
       setView("imprint");
       setListMode(false);
@@ -61,7 +64,7 @@ const Index = () => {
         setBrowseIndex(0);
       }, 2500);
     },
-    [lexicon]
+    [user]
   );
 
   const handleSelectFromList = (entry: WordEntry) => {
@@ -72,24 +75,45 @@ const Index = () => {
   };
 
   const handleEdit = useCallback(
-    (word: string, newDefinition: string) => {
-      const updated = updateDefinition(lexicon, word, newDefinition);
-      setLexicon(updated);
-      // Update foundEntry if currently viewing it
+    async (word: string, newDefinition: string) => {
+      if (!user) return;
+      const success = await updateDefinition(user.id, word, newDefinition);
+      if (!success) return;
+
+      setLexicon((prev) =>
+        prev.map((e) =>
+          e.word.toLowerCase() === word.toLowerCase()
+            ? { ...e, definition: newDefinition }
+            : e
+        )
+      );
       if (foundEntry && foundEntry.word.toLowerCase() === word.toLowerCase()) {
         setFoundEntry({ ...foundEntry, definition: newDefinition });
       }
     },
-    [lexicon, foundEntry]
+    [user, foundEntry]
   );
 
-  const showToggle = view === "browse" && lexicon.length > 0;
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-background">
+        <div className="w-12 h-1 bg-primary/30 rounded-full animate-pulse" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-screen bg-background select-none">
-      {/* Toggle button */}
-      {lexicon.length > 0 && view !== "imprint" && view !== "found" && view !== "new-word" && (
-        <div className="flex justify-end px-6 pt-4">
+      {/* Header with toggle and sign out */}
+      <div className="flex justify-between items-center px-6 pt-4">
+        <button
+          onClick={signOut}
+          className="text-muted-foreground hover:text-foreground transition-colors p-2"
+          aria-label="Sign out"
+        >
+          <LogOut size={16} />
+        </button>
+        {lexicon.length > 0 && view !== "imprint" && view !== "found" && view !== "new-word" && (
           <button
             onClick={() => setListMode(!listMode)}
             className="text-muted-foreground hover:text-foreground transition-colors p-2"
@@ -97,8 +121,8 @@ const Index = () => {
           >
             {listMode ? <BookOpen size={18} /> : <List size={18} />}
           </button>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Title - only shown when idle with empty lexicon */}
       {view === "idle" && lexicon.length === 0 && (
@@ -132,7 +156,7 @@ const Index = () => {
         </div>
       )}
 
-      {/* New word — definition input visible */}
+      {/* New word */}
       {view === "new-word" && (
         <div className="flex items-center justify-center flex-1 px-6">
           <p className="font-display text-3xl sm:text-5xl text-foreground/20 text-center">
@@ -148,7 +172,7 @@ const Index = () => {
         </div>
       )}
 
-      {/* Browse mode - card or list */}
+      {/* Browse mode */}
       {view === "browse" && !listMode && (
         <WordBrowser
           entries={lexicon}
@@ -162,7 +186,7 @@ const Index = () => {
         <WordList entries={lexicon} onSelect={handleSelectFromList} />
       )}
 
-      {/* Unified input — hidden during imprint */}
+      {/* Unified input */}
       {view !== "imprint" && (
         <UnifiedInput
           query={query}
