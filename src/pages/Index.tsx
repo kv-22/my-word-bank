@@ -105,7 +105,7 @@ const Index = () => {
   return (
     <div className="flex flex-col h-screen bg-background select-none">
       {/* Header with toggle and sign out */}
-      <div className="flex justify-between items-center px-6 pt-4">
+      <div className="flex justify-between items-center px-6 pt-[max(1rem,env(safe-area-inset-top))]">
         <button
           onClick={signOut}
           className="text-muted-foreground hover:text-foreground transition-colors p-2"
