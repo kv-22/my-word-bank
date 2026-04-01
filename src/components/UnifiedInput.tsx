@@ -1,8 +1,11 @@
 import { useState, useRef, useEffect } from "react";
+import { WordEntry } from "@/lib/lexicon";
 
 interface UnifiedInputProps {
   onSearch: (query: string) => void;
   onSave: (word: string, definition: string) => void;
+  matches: WordEntry[];
+  onSelectMatch: (entry: WordEntry) => void;
   showDefinitionInput: boolean;
   wordFound: boolean;
   query: string;
@@ -12,6 +15,8 @@ interface UnifiedInputProps {
 export default function UnifiedInput({
   onSearch,
   onSave,
+  matches,
+  onSelectMatch,
   showDefinitionInput,
   wordFound,
   query,
@@ -85,12 +90,31 @@ export default function UnifiedInput({
           placeholder="Type a word"
           className="flex-1 bg-transparent font-display text-2xl sm:text-3xl text-foreground placeholder:text-muted-foreground/40 focus:outline-none caret-accent"
         />
-        {query.trim() && !showDefinitionInput && !wordFound && (
+        {query.trim() && !showDefinitionInput && !wordFound && matches.length === 0 && (
           <span className="font-body tracking-ui text-muted-foreground ml-4 shrink-0">
             Not in lexicon
           </span>
         )}
       </div>
+      {query.trim() && !showDefinitionInput && !wordFound && matches.length > 0 && (
+        <div className="px-6 pb-4">
+          <div className="border border-border rounded-md bg-card/40 overflow-hidden">
+            {matches.map((entry) => (
+              <button
+                key={entry.word}
+                type="button"
+                onClick={() => onSelectMatch(entry)}
+                className="w-full text-left px-4 py-3 border-b border-border last:border-b-0 hover:bg-card transition-colors"
+              >
+                <span className="block font-display text-lg text-foreground">{entry.word}</span>
+                <span className="block font-body text-sm text-muted-foreground mt-0.5 line-clamp-1">
+                  {entry.definition}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

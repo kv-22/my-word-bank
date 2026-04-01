@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
-import { loadLexicon, findWord, addWord, updateDefinition, WordEntry } from "@/lib/lexicon";
+import { loadLexicon, searchWords, addWord, updateDefinition, WordEntry } from "@/lib/lexicon";
 import { useAuth } from "@/contexts/AuthContext";
 import UnifiedInput from "@/components/UnifiedInput";
 import WordDisplay from "@/components/WordDisplay";
@@ -15,6 +15,7 @@ const Index = () => {
   const [query, setQuery] = useState("");
   const [view, setView] = useState<View>("idle");
   const [foundEntry, setFoundEntry] = useState<WordEntry | null>(null);
+  const [matches, setMatches] = useState<WordEntry[]>([]);
   const [imprintEntry, setImprintEntry] = useState<WordEntry | null>(null);
   const [browseIndex, setBrowseIndex] = useState(0);
   const [listMode, setListMode] = useState(false);
@@ -32,18 +33,15 @@ const Index = () => {
     (q: string) => {
       const trimmed = q.trim();
       if (!trimmed) {
+        setMatches([]);
         setView(lexicon.length > 0 ? "browse" : "idle");
         setFoundEntry(null);
         return;
       }
-      const found = findWord(lexicon, trimmed);
-      if (found) {
-        setFoundEntry(found);
-        setView("found");
-      } else {
-        setFoundEntry(null);
-        setView("new-word");
-      }
+      const partialMatches = searchWords(lexicon, trimmed).slice(0, 8);
+      setMatches(partialMatches);
+      setFoundEntry(null);
+      setView(partialMatches.length > 0 ? "browse" : "new-word");
     },
     [lexicon]
   );
@@ -55,6 +53,7 @@ const Index = () => {
       if (!entry) return;
 
       setLexicon((prev) => [entry, ...prev.filter((e) => e.word.toLowerCase() !== word.toLowerCase())]);
+      setMatches([]);
       setImprintEntry(entry);
       setView("imprint");
       setListMode(false);
@@ -69,6 +68,7 @@ const Index = () => {
 
   const handleSelectFromList = (entry: WordEntry) => {
     setFoundEntry(entry);
+    setMatches([]);
     setView("found");
     setQuery(entry.word);
     setListMode(false);
@@ -145,6 +145,7 @@ const Index = () => {
             onClick={() => {
               setView("browse");
               setQuery("");
+              setMatches([]);
               setFoundEntry(null);
               setListMode(true);
             }}
@@ -193,6 +194,8 @@ const Index = () => {
           setQuery={setQuery}
           onSearch={handleSearch}
           onSave={handleSave}
+          matches={matches}
+          onSelectMatch={handleSelectFromList}
           showDefinitionInput={view === "new-word"}
           wordFound={view === "found"}
         />
