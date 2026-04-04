@@ -73,7 +73,7 @@ export default function UnifiedInput({
             <button
               onClick={handleSave}
               disabled={!definition.trim()}
-              className="font-body tracking-ui text-accent disabled:text-muted-foreground/30 transition-colors hover:opacity-80"
+              className="font-body tracking-ui text-accent disabled:text-muted-foreground/30 transition-[color,opacity,transform] duration-150 ease-out hover:opacity-80 active:scale-[0.98] disabled:active:scale-100 rounded-sm px-1 -mx-1"
             >
               Save
             </button>
@@ -104,7 +104,7 @@ export default function UnifiedInput({
                 key={entry.word}
                 type="button"
                 onClick={() => onSelectMatch(entry)}
-                className="w-full text-left px-4 py-3 border-b border-border last:border-b-0 hover:bg-card transition-colors"
+                className="w-full text-left px-4 py-3 border-b border-border last:border-b-0 hover:bg-card transition-[background-color,transform] duration-150 ease-out active:scale-[0.995] active:bg-muted/40"
               >
                 <span className="block font-display text-lg text-foreground">{entry.word}</span>
                 <span className="block font-body text-sm text-muted-foreground mt-0.5 line-clamp-1">

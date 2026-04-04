@@ -66,7 +66,7 @@ export default function Auth() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-3 bg-primary text-primary-foreground font-body tracking-ui rounded-md hover:opacity-90 transition-opacity disabled:opacity-50"
+          className="w-full py-3 bg-primary text-primary-foreground font-body tracking-ui rounded-md hover:opacity-90 transition-[opacity,transform] duration-150 ease-out active:scale-[0.98] active:opacity-95 disabled:opacity-50 disabled:active:scale-100"
         >
           {loading ? "…" : isSignUp ? "Sign Up" : "Sign In"}
         </button>
@@ -74,7 +74,7 @@ export default function Auth() {
 
       <button
         onClick={() => setIsSignUp(!isSignUp)}
-        className="mt-6 font-body tracking-ui text-muted-foreground hover:text-foreground transition-colors"
+        className="mt-6 font-body tracking-ui text-muted-foreground hover:text-foreground transition-[color,transform] duration-150 ease-out active:scale-[0.98] rounded-sm px-1 -mx-1"
       >
         {isSignUp ? "Already have an account? Sign in" : "Need an account? Sign up"}
       </button>

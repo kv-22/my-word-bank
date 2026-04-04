@@ -19,6 +19,7 @@ const Index = () => {
   const [imprintEntry, setImprintEntry] = useState<WordEntry | null>(null);
   const [browseIndex, setBrowseIndex] = useState(0);
   const [listMode, setListMode] = useState(false);
+  const [listScrollTop, setListScrollTop] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -66,7 +67,10 @@ const Index = () => {
     [user]
   );
 
-  const handleSelectFromList = (entry: WordEntry) => {
+  const handleSelectFromList = (entry: WordEntry, scrollTop?: number) => {
+    if (scrollTop !== undefined) {
+      setListScrollTop(scrollTop);
+    }
     setFoundEntry(entry);
     setMatches([]);
     setView("found");
@@ -108,15 +112,18 @@ const Index = () => {
       <div className="flex justify-between items-center px-6 pt-[max(1rem,env(safe-area-inset-top))]">
         <button
           onClick={signOut}
-          className="text-muted-foreground hover:text-foreground transition-colors p-2"
+          className="text-muted-foreground hover:text-foreground transition-[color,transform] duration-150 ease-out active:scale-[0.98] p-2 rounded-md"
           aria-label="Sign out"
         >
           <LogOut size={16} />
         </button>
         {lexicon.length > 0 && view !== "imprint" && view !== "found" && view !== "new-word" && (
           <button
-            onClick={() => setListMode(!listMode)}
-            className="text-muted-foreground hover:text-foreground transition-colors p-2"
+            onClick={() => {
+              if (listMode) setListScrollTop(0);
+              setListMode(!listMode);
+            }}
+            className="text-muted-foreground hover:text-foreground transition-[color,transform] duration-150 ease-out active:scale-[0.98] p-2 rounded-md"
             aria-label={listMode ? "Card view" : "List view"}
           >
             {listMode ? <BookOpen size={18} /> : <List size={18} />}
@@ -149,7 +156,7 @@ const Index = () => {
               setFoundEntry(null);
               setListMode(true);
             }}
-            className="absolute top-4 left-6 font-body tracking-ui text-muted-foreground hover:text-foreground transition-colors"
+            className="absolute top-4 left-6 font-body tracking-ui text-muted-foreground hover:text-foreground transition-[color,transform] duration-150 ease-out active:scale-[0.98] rounded-sm px-1 -mx-1"
           >
             ← Back
           </button>
@@ -184,7 +191,11 @@ const Index = () => {
       )}
 
       {view === "browse" && listMode && (
-        <WordList entries={lexicon} onSelect={handleSelectFromList} />
+        <WordList
+          entries={lexicon}
+          onSelect={handleSelectFromList}
+          scrollTop={listScrollTop}
+        />
       )}
 
       {/* Unified input */}

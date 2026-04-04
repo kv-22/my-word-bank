@@ -62,14 +62,14 @@ export default function WordDisplay({ entry, isNew, onEdit }: WordDisplayProps) 
           <div className="flex justify-center gap-6 mt-4">
             <button
               onClick={handleCancel}
-              className="font-body tracking-ui text-muted-foreground hover:text-foreground transition-colors"
+              className="font-body tracking-ui text-muted-foreground hover:text-foreground transition-[color,transform] duration-150 ease-out active:scale-[0.98] rounded-sm px-1 -mx-1"
             >
               Cancel
             </button>
             <button
               onClick={handleSave}
               disabled={!draft.trim()}
-              className="font-body tracking-ui text-accent disabled:text-muted-foreground/30 transition-colors"
+              className="font-body tracking-ui text-accent disabled:text-muted-foreground/30 transition-[color,transform] duration-150 ease-out active:scale-[0.98] disabled:active:scale-100 rounded-sm px-1 -mx-1"
             >
               Save
             </button>
@@ -83,7 +83,7 @@ export default function WordDisplay({ entry, isNew, onEdit }: WordDisplayProps) 
           {onEdit && !isNew && (
             <button
               onClick={() => setEditing(true)}
-              className="mt-3 inline-flex items-center gap-1.5 font-body tracking-ui text-secondary hover:text-primary transition-colors"
+              className="mt-3 inline-flex items-center gap-1.5 font-body tracking-ui text-secondary hover:text-primary transition-[color,transform] duration-150 ease-out active:scale-[0.98] rounded-sm px-1 -mx-1"
             >
               <Pencil size={12} />
               Edit
