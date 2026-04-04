@@ -49,8 +49,12 @@ export default function WordList({
               <span className="font-display text-xl text-foreground group-hover:text-primary transition-colors">
                 {entry.word}
               </span>
-              <span className="block font-body text-sm text-muted-foreground mt-1 leading-relaxed">
-                {entry.definition}
+              <span
+                className={`block font-body text-sm mt-1 leading-relaxed ${
+                  entry.definition.trim() ? "text-muted-foreground" : "text-muted-foreground/60 italic"
+                }`}
+              >
+                {entry.definition.trim() ? entry.definition : "No definition yet"}
               </span>
             </button>
           ))}

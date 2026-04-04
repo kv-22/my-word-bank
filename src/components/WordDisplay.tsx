@@ -77,8 +77,14 @@ export default function WordDisplay({ entry, isNew, onEdit }: WordDisplayProps) 
         </div>
       ) : (
         <div className={`mt-6 relative group ${isNew ? "animate-fade-in-slow" : ""}`}>
-          <p className="font-body text-base sm:text-lg text-foreground/80 max-w-lg leading-relaxed">
-            {entry.definition}
+          <p
+            className={`font-body text-base sm:text-lg max-w-lg leading-relaxed ${
+              entry.definition.trim()
+                ? "text-foreground/80"
+                : "text-muted-foreground italic"
+            }`}
+          >
+            {entry.definition.trim() ? entry.definition : "No definition yet"}
           </p>
           {onEdit && !isNew && (
             <button

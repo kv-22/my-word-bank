@@ -1,5 +1,15 @@
 import { useState, useRef, useEffect } from "react";
 import { WordEntry } from "@/lib/lexicon";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface UnifiedInputProps {
   onSearch: (query: string) => void;
@@ -23,6 +33,8 @@ export default function UnifiedInput({
   setQuery,
 }: UnifiedInputProps) {
   const [definition, setDefinition] = useState("");
+  const [confirmNoDefOpen, setConfirmNoDefOpen] = useState(false);
+  const [pendingWord, setPendingWord] = useState("");
   const defRef = useRef<HTMLTextAreaElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -37,13 +49,32 @@ export default function UnifiedInput({
     onSearch(value);
   };
 
-  const handleSave = () => {
-    const trimmedWord = query.trim();
-    const trimmedDef = definition.trim();
-    if (!trimmedWord || !trimmedDef) return;
-    onSave(trimmedWord, trimmedDef);
+  const finishSave = (word: string, def: string) => {
+    onSave(word, def);
     setDefinition("");
     setQuery("");
+    setPendingWord("");
+    setConfirmNoDefOpen(false);
+  };
+
+  const handleSave = () => {
+    const trimmedWord = query.trim();
+    if (!trimmedWord) return;
+    const trimmedDef = definition.trim();
+    if (trimmedDef) {
+      finishSave(trimmedWord, trimmedDef);
+      return;
+    }
+    setPendingWord(trimmedWord);
+    setConfirmNoDefOpen(true);
+  };
+
+  const handleConfirmSaveWithoutDef = () => {
+    if (!pendingWord) {
+      setConfirmNoDefOpen(false);
+      return;
+    }
+    finishSave(pendingWord, "");
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -55,6 +86,32 @@ export default function UnifiedInput({
 
   return (
     <div className="w-full border-t border-border bg-background">
+      <AlertDialog
+        open={confirmNoDefOpen}
+        onOpenChange={(open) => {
+          setConfirmNoDefOpen(open);
+          if (!open) setPendingWord("");
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Save without a definition?</AlertDialogTitle>
+            <AlertDialogDescription>
+              You can add one later from your lexicon.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="font-body tracking-ui">Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmSaveWithoutDef}
+              className="font-body tracking-ui"
+            >
+              Save word
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {showDefinitionInput && (
         <div className="px-6 pt-5 pb-3 transition-all duration-300">
           <label className="font-body tracking-ui text-muted-foreground mb-2 block">
@@ -72,7 +129,7 @@ export default function UnifiedInput({
           <div className="flex justify-end mt-2">
             <button
               onClick={handleSave}
-              disabled={!definition.trim()}
+              disabled={!query.trim()}
               className="font-body tracking-ui text-accent disabled:text-muted-foreground/30 transition-[color,opacity,transform] duration-150 ease-out hover:opacity-80 active:scale-[0.98] disabled:active:scale-100 rounded-sm px-1 -mx-1"
             >
               Save
@@ -107,8 +164,14 @@ export default function UnifiedInput({
                 className="w-full text-left px-4 py-3 border-b border-border last:border-b-0 hover:bg-card transition-[background-color,transform] duration-150 ease-out active:scale-[0.995] active:bg-muted/40"
               >
                 <span className="block font-display text-lg text-foreground">{entry.word}</span>
-                <span className="block font-body text-sm text-muted-foreground mt-0.5 line-clamp-1">
-                  {entry.definition}
+                <span
+                  className={`block font-body text-sm mt-0.5 line-clamp-1 ${
+                    entry.definition.trim()
+                      ? "text-muted-foreground"
+                      : "text-muted-foreground/60 italic"
+                  }`}
+                >
+                  {entry.definition.trim() ? entry.definition : "No definition yet"}
                 </span>
               </button>
             ))}
