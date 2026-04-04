@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useLayoutEffect } from "react";
 import { WordEntry } from "@/lib/lexicon";
 import { Pencil } from "lucide-react";
 
@@ -11,6 +11,19 @@ interface WordDisplayProps {
 export default function WordDisplay({ entry, isNew, onEdit }: WordDisplayProps) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(entry.definition);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const syncTextareaHeight = () => {
+    const el = textareaRef.current;
+    if (!el) return;
+    el.style.height = "0px";
+    el.style.height = `${el.scrollHeight}px`;
+  };
+
+  useLayoutEffect(() => {
+    if (!editing) return;
+    syncTextareaHeight();
+  }, [editing, draft]);
 
   useEffect(() => {
     setDraft(entry.definition);
@@ -51,28 +64,34 @@ export default function WordDisplay({ entry, isNew, onEdit }: WordDisplayProps) 
       )}
 
       {editing ? (
-        <div className={`mt-6 w-full max-w-lg ${isNew ? "animate-fade-in-slow" : ""}`}>
-          <textarea
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            rows={3}
-            autoFocus
-            className="w-full bg-transparent font-body text-base text-foreground text-center border-b border-border focus:border-accent focus:outline-none resize-none leading-relaxed"
-          />
-          <div className="flex justify-center gap-6 mt-4">
-            <button
-              onClick={handleCancel}
-              className="font-body tracking-ui text-muted-foreground hover:text-foreground transition-[color,transform] duration-150 ease-out active:scale-[0.98] rounded-sm px-1 -mx-1"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleSave}
-              disabled={!draft.trim()}
-              className="font-body tracking-ui text-accent disabled:text-muted-foreground/30 transition-[color,transform] duration-150 ease-out active:scale-[0.98] disabled:active:scale-100 rounded-sm px-1 -mx-1"
-            >
-              Save
-            </button>
+        <div
+          className={`mt-6 w-full max-w-lg flex flex-col items-center ${isNew ? "animate-fade-in-slow" : ""}`}
+        >
+          {/* column-reverse: underline stays by the actions; extra lines grow upward */}
+          <div className="flex w-full flex-col-reverse items-stretch gap-3">
+            <div className="flex justify-center gap-6">
+              <button
+                onClick={handleCancel}
+                className="font-body tracking-ui text-muted-foreground hover:text-foreground transition-[color,transform] duration-150 ease-out active:scale-[0.98] rounded-sm px-1 -mx-1"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSave}
+                disabled={!draft.trim()}
+                className="font-body tracking-ui text-accent disabled:text-muted-foreground/30 transition-[color,transform] duration-150 ease-out active:scale-[0.98] disabled:active:scale-100 rounded-sm px-1 -mx-1"
+              >
+                Save
+              </button>
+            </div>
+            <textarea
+              ref={textareaRef}
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              rows={1}
+              autoFocus
+              className="w-full min-h-0 max-h-[min(50vh,14rem)] overflow-y-auto bg-transparent font-body text-base text-foreground text-center border-b border-border focus:border-accent focus:outline-none resize-none leading-relaxed"
+            />
           </div>
         </div>
       ) : (
