@@ -5,9 +5,11 @@ import UnifiedInput from "@/components/UnifiedInput";
 import WordDisplay from "@/components/WordDisplay";
 import WordBrowser from "@/components/WordBrowser";
 import WordList from "@/components/WordList";
-import { List, BookOpen, LogOut } from "lucide-react";
+import GameSession from "@/components/GameSession";
+import { List, BookOpen, LogOut, Play, Library } from "lucide-react";
 
 type View = "idle" | "found" | "new-word" | "imprint" | "browse";
+type AppMode = "lexicon" | "play";
 
 const Index = () => {
   const { user, signOut } = useAuth();
@@ -21,6 +23,7 @@ const Index = () => {
   const [listMode, setListMode] = useState(false);
   const [listScrollTop, setListScrollTop] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [appMode, setAppMode] = useState<AppMode>("lexicon");
 
   useEffect(() => {
     loadLexicon().then((entries) => {
@@ -117,22 +120,43 @@ const Index = () => {
         >
           <LogOut size={16} />
         </button>
-        {lexicon.length > 0 && view !== "imprint" && view !== "found" && view !== "new-word" && (
-          <button
-            onClick={() => {
-              if (listMode) setListScrollTop(0);
-              setListMode(!listMode);
-            }}
-            className="text-muted-foreground hover:text-foreground transition-[color,transform] duration-150 ease-out active:scale-[0.98] p-2 rounded-md"
-            aria-label={listMode ? "Card view" : "List view"}
-          >
-            {listMode ? <BookOpen size={18} /> : <List size={18} />}
-          </button>
-        )}
+        <div className="flex items-center gap-2">
+          {lexicon.length > 0 && view !== "imprint" && view !== "found" && view !== "new-word" && (
+            <button
+              onClick={() => {
+                setAppMode(appMode === "play" ? "lexicon" : "play");
+                setQuery("");
+                setMatches([]);
+                setFoundEntry(null);
+                if (view !== "browse") setView("browse");
+              }}
+              className="text-muted-foreground hover:text-foreground transition-[color,transform] duration-150 ease-out active:scale-[0.98] p-2 rounded-md"
+              aria-label={appMode === "play" ? "Lexicon mode" : "Play mode"}
+            >
+              {appMode === "play" ? <Library size={18} /> : <Play size={18} />}
+            </button>
+          )}
+          {appMode === "lexicon" && lexicon.length > 0 && view !== "imprint" && view !== "found" && view !== "new-word" && (
+            <button
+              onClick={() => {
+                if (listMode) setListScrollTop(0);
+                setListMode(!listMode);
+              }}
+              className="text-muted-foreground hover:text-foreground transition-[color,transform] duration-150 ease-out active:scale-[0.98] p-2 rounded-md"
+              aria-label={listMode ? "Card view" : "List view"}
+            >
+              {listMode ? <BookOpen size={18} /> : <List size={18} />}
+            </button>
+          )}
+        </div>
       </div>
 
+      {appMode === "play" && (
+        <GameSession onDone={() => setAppMode("lexicon")} />
+      )}
+
       {/* Title - only shown when idle with empty lexicon */}
-      {view === "idle" && lexicon.length === 0 && (
+      {appMode === "lexicon" && view === "idle" && lexicon.length === 0 && (
         <div className="flex flex-col items-center justify-center flex-1 px-6">
           <div className="w-16 h-1 bg-primary rounded-full mb-8" />
           <h1 className="font-display text-4xl sm:text-6xl font-bold text-foreground text-center">
@@ -146,7 +170,7 @@ const Index = () => {
       )}
 
       {/* Found word display */}
-      {view === "found" && foundEntry && (
+      {appMode === "lexicon" && view === "found" && foundEntry && (
         <div className="flex items-center justify-center flex-1 relative">
           <button
             onClick={() => {
@@ -165,7 +189,7 @@ const Index = () => {
       )}
 
       {/* New word */}
-      {view === "new-word" && (
+      {appMode === "lexicon" && view === "new-word" && (
         <div className="flex items-center justify-center flex-1 px-6">
           <p className="font-display text-3xl sm:text-5xl text-foreground/20 text-center">
             {query || "…"}
@@ -174,14 +198,14 @@ const Index = () => {
       )}
 
       {/* Imprint moment */}
-      {view === "imprint" && imprintEntry && (
+      {appMode === "lexicon" && view === "imprint" && imprintEntry && (
         <div className="flex items-center justify-center flex-1">
           <WordDisplay entry={imprintEntry} isNew />
         </div>
       )}
 
       {/* Browse mode */}
-      {view === "browse" && !listMode && (
+      {appMode === "lexicon" && view === "browse" && !listMode && (
         <WordBrowser
           entries={lexicon}
           currentIndex={browseIndex}
@@ -190,7 +214,7 @@ const Index = () => {
         />
       )}
 
-      {view === "browse" && listMode && (
+      {appMode === "lexicon" && view === "browse" && listMode && (
         <WordList
           entries={lexicon}
           onSelect={handleSelectFromList}
@@ -199,7 +223,7 @@ const Index = () => {
       )}
 
       {/* Unified input */}
-      {view !== "imprint" && (
+      {appMode === "lexicon" && view !== "imprint" && (
         <UnifiedInput
           query={query}
           setQuery={setQuery}

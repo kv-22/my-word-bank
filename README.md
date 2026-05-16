@@ -59,6 +59,27 @@ This project is built with:
 - React
 - shadcn-ui
 - Tailwind CSS
+- FastAPI
+
+## Local bandit game API
+
+The vocabulary game uses a local FastAPI sidecar so the bandit logic can stay in Python.
+
+```sh
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+npm run dev:api
+```
+
+In another terminal, run the React app:
+
+```sh
+npm run dev
+```
+
+The React app calls `VITE_BANDIT_API_URL` when set, otherwise it uses `http://localhost:8000`.
+Apply the Supabase migrations before playing so the persisted Q-table and word stats tables exist.
 
 ## How can I deploy this project?
 
