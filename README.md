@@ -78,7 +78,7 @@ In another terminal, run the React app:
 npm run dev
 ```
 
-The React app calls `VITE_BANDIT_API_URL` when set, otherwise it uses `http://localhost:8000`.
+The React app calls `VITE_BACKEND_URL` when set, otherwise it uses `http://localhost:8000`.
 Apply the Supabase migrations before playing so the persisted Q-table and word stats tables exist.
 
 ## How can I deploy this project?

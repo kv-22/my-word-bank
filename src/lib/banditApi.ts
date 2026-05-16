@@ -41,7 +41,7 @@ export interface EndSessionResponse {
   summary: GameSummary;
 }
 
-const API_URL = import.meta.env.VITE_BANDIT_API_URL ?? "http://localhost:8000";
+const API_URL = import.meta.env.VITE_BACKEND_URL ?? "http://localhost:8000";
 
 async function authHeaders(): Promise<Record<string, string>> {
   const { data } = await supabase.auth.getSession();
