@@ -14,6 +14,132 @@ export type Database = {
   }
   public: {
     Tables: {
+      bandit_answer_logs: {
+        Row: {
+          answer_count: number
+          created_at: string
+          id: string
+          q_value: number
+          reward: number
+          session_id: string
+          user_id: string
+          word_id: string
+        }
+        Insert: {
+          answer_count: number
+          created_at?: string
+          id?: string
+          q_value: number
+          reward: number
+          session_id: string
+          user_id: string
+          word_id: string
+        }
+        Update: {
+          answer_count?: number
+          created_at?: string
+          id?: string
+          q_value?: number
+          reward?: number
+          session_id?: string
+          user_id?: string
+          word_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bandit_answer_logs_word_id_fkey"
+            columns: ["word_id"]
+            isOneToOne: false
+            referencedRelation: "words"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bandit_q_values: {
+        Row: {
+          created_at: string
+          id: string
+          q_value: number
+          state_key: string
+          updated_at: string
+          user_id: string
+          word_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          q_value?: number
+          state_key: string
+          updated_at?: string
+          user_id: string
+          word_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          q_value?: number
+          state_key?: string
+          updated_at?: string
+          user_id?: string
+          word_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bandit_q_values_word_id_fkey"
+            columns: ["word_id"]
+            isOneToOne: false
+            referencedRelation: "words"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bandit_word_stats: {
+        Row: {
+          created_at: string
+          id: string
+          last_answered_at: string | null
+          last_result: boolean | null
+          times_correct: number
+          times_selected: number
+          times_wrong: number
+          updated_at: string
+          user_id: string
+          word_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_answered_at?: string | null
+          last_result?: boolean | null
+          times_correct?: number
+          times_selected?: number
+          times_wrong?: number
+          updated_at?: string
+          user_id: string
+          word_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_answered_at?: string | null
+          last_result?: boolean | null
+          times_correct?: number
+          times_selected?: number
+          times_wrong?: number
+          updated_at?: string
+          user_id?: string
+          word_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bandit_word_stats_word_id_fkey"
+            columns: ["word_id"]
+            isOneToOne: false
+            referencedRelation: "words"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       words: {
         Row: {
           created_at: string
