@@ -9,10 +9,10 @@ from game.bandit import MultiArmedBandit
 
 
 ALPHA = 0.1
-EPSILON = 0.1
 OPTIMISTIC_INITIAL_Q = 13.0
 MAX_ASKS_PER_SESSION = 2
 OPTION_COUNT = 4
+REVIEW_PRIORITY_PER_DAY = 0.1
 
 
 @dataclass
@@ -82,7 +82,7 @@ class GameService:
 
         q_values = self.supabase.load_q_values(token, session.user_id, state_key)
         old_q = q_values.get(word_id, OPTIMISTIC_INITIAL_Q)
-        
+
         new_q = old_q + (ALPHA * (reward - old_q))
         updated_stats = self._updated_stats_payload(session.user_id, word_id, is_correct, stats)
 
@@ -95,7 +95,7 @@ class GameService:
             session.wrong += 1
             session.wrong_streak_count += 1
             session.correct_streak_count = 0
-        
+
         # print(session.correct_streak_count)
         # print(session.wrong_streak_count)
 
@@ -160,15 +160,26 @@ class GameService:
             session.current_round = None
             return None
 
-        state_key = session.state_key()
-        q_values = self.supabase.load_q_values(session.token, session.user_id, state_key)
-        table = {
-            (state_key, word["id"]): q_values.get(word["id"], OPTIMISTIC_INITIAL_Q)
-            for word in eligible_words
+        candidate_ids = [word["id"] for word in eligible_words]
+        stats_by_word_id = self.supabase.load_word_stats_for_words(
+            session.token,
+            session.user_id,
+            candidate_ids,
+        )
+        bayes_by_word_id = {
+            word_id: self._beta_params(stats_by_word_id.get(word_id))
+            for word_id in candidate_ids
         }
-        # print(table)
-        bandit = MultiArmedBandit(alpha=ALPHA, epsilon=EPSILON, table=table)
-        selected_word_id = bandit.select(state_key, [word["id"] for word in eligible_words])
+        review_priority_by_word_id = {
+            word_id: self._review_priority(stats_by_word_id.get(word_id))
+            for word_id in candidate_ids
+        }
+        bandit = MultiArmedBandit(alpha=ALPHA)
+        selected_word_id = bandit.select(
+            candidate_ids,
+            bayes_by_word_id,
+            review_priority_by_word_id,
+        )
         selected_word = next(word for word in eligible_words if word["id"] == selected_word_id)
 
         session.ask_counts[selected_word_id] = session.ask_counts.get(selected_word_id, 0) + 1
@@ -198,6 +209,22 @@ class GameService:
             "options": options,
         }
 
+    def _beta_params(self, stats: dict | None) -> tuple[float, float]:
+        if not stats:
+            return (1.0, 1.0)
+        times_wrong = int(stats.get("times_wrong", 0))
+        times_correct = int(stats.get("times_correct", 0))
+        return (max(times_wrong, 1.0), max(times_correct, 1.0))
+
+    def _review_priority(self, stats: dict | None) -> float:
+        if not stats:
+            return 0.0
+        last_answered_at = self._parse_timestamp(stats.get("last_answered_at"))
+        if not last_answered_at:
+            return 0.0
+        elapsed = datetime.now(timezone.utc) - last_answered_at
+        return max(elapsed.days, 0) * REVIEW_PRIORITY_PER_DAY
+
     def _calculate_reward(self, is_correct: bool, stats: dict | None) -> float:
         reward = 1.0 if is_correct else 5.0
 
@@ -205,7 +232,7 @@ class GameService:
         times_selected = int(stats.get("times_selected", 0)) if stats else 0
         times_correct += 1 if is_correct else 0
         times_selected += 1
-    
+
         if is_correct and stats and stats.get("last_result") is False:
             reward += 1.0
         if not is_correct and stats and stats.get("last_result") is True:
@@ -215,6 +242,8 @@ class GameService:
                 elapsed = datetime.now(timezone.utc) - last_answered_at
                 if elapsed.days >= 7:
                     reward += 3.0
+        if not is_correct and stats and stats.get("last_result") is False:
+            reward += 3
 
         recall_rate = (times_correct + 1) / (times_selected + 2)
         difficulty_bonus = (1.0 - recall_rate) * (3.0 if not is_correct else 1.0)

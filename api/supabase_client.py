@@ -86,6 +86,24 @@ class SupabaseClient:
         rows = self._request("GET", f"/rest/v1/bandit_word_stats?{query}", token)
         return rows[0] if rows else None
 
+    def load_word_stats_for_words(
+        self,
+        token: str,
+        user_id: str,
+        word_ids: list[str],
+    ) -> dict[str, dict[str, Any]]:
+        if not word_ids:
+            return {}
+        query = urlencode(
+            {
+                "select": "*",
+                "user_id": f"eq.{user_id}",
+                "word_id": f"in.({','.join(word_ids)})",
+            }
+        )
+        rows = self._request("GET", f"/rest/v1/bandit_word_stats?{query}", token)
+        return {row["word_id"]: row for row in rows}
+
     def upsert_q_value(
         self,
         token: str,

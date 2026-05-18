@@ -31,6 +31,13 @@ class FakeSupabase:
     def load_word_stats(self, token, user_id, word_id):
         return self.stats.get(word_id)
 
+    def load_word_stats_for_words(self, token, user_id, word_ids):
+        return {
+            word_id: self.stats[word_id]
+            for word_id in word_ids
+            if word_id in self.stats
+        }
+
     def upsert_q_value(self, token, user_id, word_id, state_key, q_value):
         self.saved_q_values.append((word_id, state_key, q_value))
         self.q_values.setdefault(state_key, {})[word_id] = q_value
@@ -56,14 +63,30 @@ class GameServiceTest(unittest.TestCase):
 
         self.assertEqual(bandit.get_q_value("state", "word"), 0.5)
 
-    def test_bandit_selects_best_action(self):
-        table = {
-            ("state", "low"): 0.25,
-            ("state", "high"): 1.5,
-        }
-        bandit = MultiArmedBandit(alpha=0.1, epsilon=0, table=table)
+    def test_bandit_selects_highest_thompson_sampled_action(self):
+        bandit = MultiArmedBandit(alpha=0.1)
 
-        self.assertEqual(bandit.select("state", ["low", "high"]), "high")
+        with patch("game.bandit.random.betavariate", side_effect=[0.25, 0.75]):
+            self.assertEqual(
+                bandit.select(
+                    ["low", "high"],
+                    {"low": (1, 4), "high": (4, 1)},
+                ),
+                "high",
+            )
+
+    def test_bandit_adds_review_priority_to_sample(self):
+        bandit = MultiArmedBandit(alpha=0.1)
+
+        with patch("game.bandit.random.betavariate", side_effect=[0.7, 0.2]):
+            self.assertEqual(
+                bandit.select(
+                    ["recent", "stale"],
+                    {"recent": (1, 1), "stale": (1, 1)},
+                    {"stale": 0.6},
+                ),
+                "stale",
+            )
 
     def test_reward_calculation(self):
         service = GameService(FakeSupabase())
@@ -78,6 +101,19 @@ class GameServiceTest(unittest.TestCase):
         old_timestamp = (datetime.now(timezone.utc) - timedelta(days=8)).isoformat()
         stats = {"last_result": True, "last_answered_at": old_timestamp}
         self.assertEqual(service._calculate_reward(False, stats), 12)
+
+    def test_beta_params_use_loaded_counts_without_incrementing_history(self):
+        service = GameService(FakeSupabase())
+
+        self.assertEqual(service._beta_params(None), (1.0, 1.0))
+        self.assertEqual(
+            service._beta_params({"times_wrong": 3, "times_correct": 7}),
+            (3, 7),
+        )
+        self.assertEqual(
+            service._beta_params({"times_wrong": 0, "times_correct": 7}),
+            (1.0, 7),
+        )
 
     def test_candidate_generation_includes_correct_and_dedupes_definitions(self):
         words = [
@@ -129,20 +165,19 @@ class GameServiceTest(unittest.TestCase):
             all(previous != current for previous, current in zip(seen, seen[1:]))
         )
 
-    def test_optimistic_initialization_prefers_untried_words(self):
+    def test_thompson_sampling_uses_loaded_word_stats(self):
         fake = FakeSupabase()
-        fake.q_values = {
-            "wrong:false|correct:false": {
-                "one": 0.2,
-                "two": 0.1,
-            }
+        fake.stats = {
+            "one": {"times_correct": 8, "times_wrong": 1, "last_answered_at": None},
+            "two": {"times_correct": 1, "times_wrong": 8, "last_answered_at": None},
+            "three": {"times_correct": 4, "times_wrong": 4, "last_answered_at": None},
         }
         service = GameService(fake)
 
-        with patch("game.bandit.random.random", return_value=1.0):
+        with patch("game.bandit.random.betavariate", side_effect=[0.1, 0.9, 0.5]):
             started = service.start_session("token")
 
-        self.assertEqual(started["round"]["wordId"], "three")
+        self.assertEqual(started["round"]["wordId"], "two")
 
     def test_session_rejects_insufficient_vocabulary(self):
         service = GameService(
