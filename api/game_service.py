@@ -215,6 +215,8 @@ class GameService:
                 elapsed = datetime.now(timezone.utc) - last_answered_at
                 if elapsed.days >= 7:
                     reward += 3.0
+        if not is_correct and stats and stats.get("last_result") is False:
+            reward += 3
 
         recall_rate = (times_correct + 1) / (times_selected + 2)
         difficulty_bonus = (1.0 - recall_rate) * (3.0 if not is_correct else 1.0)
