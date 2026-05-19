@@ -127,7 +127,7 @@ export default function GameSession({ onDone }: GameSessionProps) {
       <div className="flex flex-1 flex-col items-center justify-center bg-background px-6 text-center">
         <div className="w-12 h-1 bg-primary/30 rounded-full animate-pulse" />
         <p className="mt-6 font-body tracking-ui text-muted-foreground">
-          Starting...
+          Getting ready...
         </p>
       </div>
     );

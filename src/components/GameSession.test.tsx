@@ -35,12 +35,12 @@ describe("GameSession", () => {
     });
   });
 
-  it("shows loading copy while starting play", () => {
+  it("shows loading copy while getting ready to play", () => {
     startGameSession.mockImplementation(() => new Promise(() => {}));
 
     render(<GameSession onDone={vi.fn()} />);
 
-    expect(screen.getByText("Starting...")).toBeInTheDocument();
+    expect(screen.getByText("Getting ready...")).toBeInTheDocument();
   });
 
   it("starts a play session", async () => {
