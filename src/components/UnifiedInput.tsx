@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { WordEntry } from "@/lib/lexicon";
 import {
   AlertDialog,
@@ -35,14 +35,7 @@ export default function UnifiedInput({
   const [definition, setDefinition] = useState("");
   const [confirmNoDefOpen, setConfirmNoDefOpen] = useState(false);
   const [pendingWord, setPendingWord] = useState("");
-  const defRef = useRef<HTMLTextAreaElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
-
   // No auto-focus on definition input — user navigates manually
-
-  useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
 
   const handleInputChange = (value: string) => {
     setQuery(value);
@@ -118,7 +111,6 @@ export default function UnifiedInput({
             Definition
           </label>
           <textarea
-            ref={defRef}
             value={definition}
             onChange={(e) => setDefinition(e.target.value)}
             onKeyDown={handleKeyDown}
@@ -140,7 +132,6 @@ export default function UnifiedInput({
 
       <div className="flex items-center px-6 py-5">
         <input
-          ref={inputRef}
           type="text"
           value={query}
           onChange={(e) => handleInputChange(e.target.value)}
