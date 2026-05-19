@@ -27,7 +27,7 @@ export default defineConfig(({ mode }) => ({
         name: "Ostracon",
         short_name: "Ostracon",
         description: "Your personal lexicon",
-        theme_color: "#d4451a",
+        theme_color: "#f5f0e8",
         background_color: "#f5f0e8",
         display: "standalone",
         orientation: "portrait",
