@@ -35,6 +35,14 @@ describe("GameSession", () => {
     });
   });
 
+  it("shows loading copy while starting play", () => {
+    startGameSession.mockImplementation(() => new Promise(() => {}));
+
+    render(<GameSession onDone={vi.fn()} />);
+
+    expect(screen.getByText("Starting...")).toBeInTheDocument();
+  });
+
   it("starts a play session", async () => {
     startGameSession.mockResolvedValue({
       sessionId: "session-1",
