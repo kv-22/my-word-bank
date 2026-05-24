@@ -58,33 +58,30 @@ export type Database = {
       bandit_q_values: {
         Row: {
           created_at: string
-          correct_streak: boolean
           id: string
           q_value: number
+          state_key: string
           updated_at: string
           user_id: string
           word_id: string
-          wrong_streak: boolean
         }
         Insert: {
           created_at?: string
-          correct_streak?: boolean
           id?: string
           q_value?: number
+          state_key: string
           updated_at?: string
           user_id: string
           word_id: string
-          wrong_streak?: boolean
         }
         Update: {
           created_at?: string
-          correct_streak?: boolean
           id?: string
           q_value?: number
+          state_key?: string
           updated_at?: string
           user_id?: string
           word_id?: string
-          wrong_streak?: boolean
         }
         Relationships: [
           {
