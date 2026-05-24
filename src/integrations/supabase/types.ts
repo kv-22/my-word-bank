@@ -57,31 +57,34 @@ export type Database = {
       }
       bandit_q_values: {
         Row: {
+          correct_streak: boolean
           created_at: string
           id: string
           q_value: number
-          state_key: string
           updated_at: string
           user_id: string
           word_id: string
+          wrong_streak: boolean
         }
         Insert: {
+          correct_streak?: boolean
           created_at?: string
           id?: string
           q_value?: number
-          state_key: string
           updated_at?: string
           user_id: string
           word_id: string
+          wrong_streak?: boolean
         }
         Update: {
+          correct_streak?: boolean
           created_at?: string
           id?: string
           q_value?: number
-          state_key?: string
           updated_at?: string
           user_id?: string
           word_id?: string
+          wrong_streak?: boolean
         }
         Relationships: [
           {
@@ -175,7 +178,22 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      record_bandit_answer: {
+        Args: {
+          p_correct_streak: boolean
+          p_last_answered_at: string
+          p_last_result: boolean
+          p_q_value: number
+          p_reward: number
+          p_session_id: string
+          p_times_correct: number
+          p_times_selected: number
+          p_times_wrong: number
+          p_word_id: string
+          p_wrong_streak: boolean
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
