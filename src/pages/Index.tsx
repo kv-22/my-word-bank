@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { loadLexicon, searchWords, addWord, updateDefinition, WordEntry } from "@/lib/lexicon";
 import { useAuth } from "@/contexts/AuthContext";
 import UnifiedInput from "@/components/UnifiedInput";
@@ -6,13 +7,14 @@ import WordDisplay from "@/components/WordDisplay";
 import WordBrowser from "@/components/WordBrowser";
 import WordList from "@/components/WordList";
 import GameSession from "@/components/GameSession";
-import { List, BookOpen, LogOut, Play, Library } from "lucide-react";
+import { List, BookOpen, LogOut, Play, Library, User } from "lucide-react";
 
 type View = "idle" | "found" | "new-word" | "imprint" | "browse";
 type AppMode = "lexicon" | "play";
 
 const Index = () => {
   const { user, signOut } = useAuth();
+  const navigate = useNavigate();
   const [lexicon, setLexicon] = useState<WordEntry[]>([]);
   const [query, setQuery] = useState("");
   const [view, setView] = useState<View>("idle");
@@ -148,6 +150,13 @@ const Index = () => {
               {listMode ? <BookOpen size={18} /> : <List size={18} />}
             </button>
           )}
+          <button
+            onClick={() => navigate("/profile")}
+            className="text-muted-foreground hover:text-foreground transition-[color,transform] duration-150 ease-out active:scale-[0.98] p-2 rounded-md"
+            aria-label="Profile"
+          >
+            <User size={18} />
+          </button>
         </div>
       </div>
 
