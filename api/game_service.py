@@ -120,21 +120,24 @@ class GameService:
         # print(session.correct_streak_count)
         # print(session.wrong_streak_count)
 
-        self.supabase.upsert_q_value(token, session.user_id, word_id, state_key, new_q)
-        q_values[word_id] = new_q
-        self.supabase.upsert_word_stats(token, updated_stats)
-        session.word_stats[word_id] = updated_stats
-        self.supabase.insert_answer_log(
+        self.supabase.record_answer(
             token,
             {
-                "user_id": session.user_id,
-                "word_id": word_id,
-                "session_id": session_id,
-                "answer_count": updated_stats["times_selected"],
-                "reward": reward,
-                "q_value": new_q,
+                "p_word_id": word_id,
+                "p_session_id": session_id,
+                "p_reward": reward,
+                "p_q_value": new_q,
+                "p_wrong_streak": state_key["wrong_streak"],
+                "p_correct_streak": state_key["correct_streak"],
+                "p_times_selected": updated_stats["times_selected"],
+                "p_times_correct": updated_stats["times_correct"],
+                "p_times_wrong": updated_stats["times_wrong"],
+                "p_last_result": updated_stats["last_result"],
+                "p_last_answered_at": updated_stats["last_answered_at"],
             },
         )
+        q_values[word_id] = new_q
+        session.word_stats[word_id] = updated_stats
 
         next_round = self._next_round(session)
         return {

@@ -18,6 +18,7 @@ class FakeSupabase:
         self.saved_q_values = []
         self.saved_stats = []
         self.saved_answer_logs = []
+        self.record_answer_calls = []
         self.load_all_q_values_calls = []
         self.load_q_values_calls = []
         self.load_word_stats_calls = []
@@ -44,6 +45,39 @@ class FakeSupabase:
     def load_word_stats(self, token, user_id, word_id):
         self.load_word_stats_calls.append(word_id)
         return self.stats.get(word_id)
+
+    def record_answer(self, token, payload):
+        self.record_answer_calls.append(payload)
+        state_key = {
+            "wrong_streak": payload["p_wrong_streak"],
+            "correct_streak": payload["p_correct_streak"],
+        }
+        updated_stats = {
+            "user_id": "user-1",
+            "word_id": payload["p_word_id"],
+            "times_selected": payload["p_times_selected"],
+            "times_correct": payload["p_times_correct"],
+            "times_wrong": payload["p_times_wrong"],
+            "last_result": payload["p_last_result"],
+            "last_answered_at": payload["p_last_answered_at"],
+        }
+        answer_log = {
+            "user_id": "user-1",
+            "word_id": payload["p_word_id"],
+            "session_id": payload["p_session_id"],
+            "answer_count": payload["p_times_selected"],
+            "reward": payload["p_reward"],
+            "q_value": payload["p_q_value"],
+        }
+        self.upsert_q_value(
+            token,
+            "user-1",
+            payload["p_word_id"],
+            state_key,
+            payload["p_q_value"],
+        )
+        self.upsert_word_stats(token, updated_stats)
+        self.insert_answer_log(token, answer_log)
 
     def upsert_q_value(self, token, user_id, word_id, state_key, q_value):
         self.saved_q_values.append((word_id, state_key, q_value))
@@ -181,6 +215,7 @@ class GameServiceTest(unittest.TestCase):
         self.assertEqual(response["summary"]["correctStreak"], 1)
         self.assertTrue(fake.saved_q_values)
         self.assertTrue(fake.saved_stats)
+        self.assertEqual(len(fake.record_answer_calls), 1)
 
     def test_session_loads_all_q_values_once(self):
         fake = FakeSupabase()
@@ -210,6 +245,7 @@ class GameServiceTest(unittest.TestCase):
         self.assertEqual(log["answer_count"], saved_stats["times_selected"])
         self.assertEqual(log["reward"], response["reward"])
         self.assertEqual(log["q_value"], response["updatedQValue"])
+        self.assertEqual(len(fake.record_answer_calls), 1)
 
     def test_end_session_clears_active_session(self):
         service = GameService(FakeSupabase())

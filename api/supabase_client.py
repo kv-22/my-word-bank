@@ -106,6 +106,14 @@ class SupabaseClient:
         rows = self._request("GET", f"/rest/v1/bandit_word_stats?{query}", token)
         return rows[0] if rows else None
 
+    def record_answer(self, token: str, payload: dict[str, Any]) -> None:
+        self._request(
+            "POST",
+            "/rest/v1/rpc/record_bandit_answer",
+            token,
+            payload,
+        )
+
     def upsert_q_value(
         self,
         token: str,
