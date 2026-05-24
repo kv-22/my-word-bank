@@ -12,10 +12,10 @@ CREATE TABLE public.profiles (
 
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Profiles viewable by authenticated users"
+CREATE POLICY "Users can view their own profile"
   ON public.profiles FOR SELECT
   TO authenticated
-  USING (true);
+  USING (auth.uid() = user_id);
 
 CREATE POLICY "Users can insert their own profile"
   ON public.profiles FOR INSERT
