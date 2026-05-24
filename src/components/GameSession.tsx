@@ -19,6 +19,7 @@ type Feedback = {
 
 const emptySummary: GameSummary = { answered: 0, correct: 0, wrong: 0, correctStreak: 0 };
 const MAX_STREAK_BULBS = 5;
+const answerSubmitErrorMessage = "Could not submit your answer. Please try again in a moment.";
 const confettiPieces = Array.from({ length: 24 }, (_, index) => ({
   id: index,
   left: `${12 + ((index * 17) % 76)}%`,
@@ -80,7 +81,8 @@ export default function GameSession({ onDone }: GameSessionProps) {
       setSummary(response.summary);
       setPendingRound(response.nextRound);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not submit your answer.");
+      console.error("Failed to submit game answer:", err);
+      setError(answerSubmitErrorMessage);
     } finally {
       setSubmitting(false);
     }

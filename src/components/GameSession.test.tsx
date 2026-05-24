@@ -82,6 +82,25 @@ describe("GameSession", () => {
     expect(screen.getByRole("button", { name: "Next" })).toBeInTheDocument();
   });
 
+  it("shows friendly copy when answer submission fails", async () => {
+    startGameSession.mockResolvedValue({
+      sessionId: "session-1",
+      round: firstRound,
+      summary: { answered: 0, correct: 0, wrong: 0, correctStreak: 0 },
+    });
+    answerGameRound.mockRejectedValue(new Error("HTTP Error 404: Not Found"));
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    render(<GameSession onDone={vi.fn()} />);
+    fireEvent.click(await screen.findByRole("button", { name: "to lessen" }));
+
+    expect(
+      await screen.findByText("Could not submit your answer. Please try again in a moment.")
+    ).toBeInTheDocument();
+    expect(screen.queryByText("HTTP Error 404: Not Found")).not.toBeInTheDocument();
+    consoleError.mockRestore();
+  });
+
   it("shows a completed session summary", async () => {
     startGameSession.mockResolvedValue({
       sessionId: "session-1",
