@@ -29,10 +29,11 @@ class SessionState:
     correct: int = 0
     wrong: int = 0
 
-    def state_key(self) -> str:
-        wrong_streak = self.wrong_streak_count >= 3
-        correct_streak = self.correct_streak_count >= 3
-        return f"wrong:{str(wrong_streak).lower()}|correct:{str(correct_streak).lower()}"
+    def state_key(self) -> dict[str, bool]:
+        return {
+            "wrong_streak": self.wrong_streak_count >= 3,
+            "correct_streak": self.correct_streak_count >= 3,
+        }
 
     def summary(self) -> dict:
         return {
@@ -41,6 +42,10 @@ class SessionState:
             "wrong": self.wrong,
             "correctStreak": self.correct_streak_count,
         }
+
+
+def bandit_state_key(state_key: dict[str, bool]) -> tuple[bool, bool]:
+    return (state_key["wrong_streak"], state_key["correct_streak"])
 
 
 class GameService:
@@ -161,14 +166,15 @@ class GameService:
             return None
 
         state_key = session.state_key()
+        bandit_key = bandit_state_key(state_key)
         q_values = self.supabase.load_q_values(session.token, session.user_id, state_key)
         table = {
-            (state_key, word["id"]): q_values.get(word["id"], OPTIMISTIC_INITIAL_Q)
+            (bandit_key, word["id"]): q_values.get(word["id"], OPTIMISTIC_INITIAL_Q)
             for word in eligible_words
         }
         # print(table)
         bandit = MultiArmedBandit(alpha=ALPHA, epsilon=EPSILON, table=table)
-        selected_word_id = bandit.select(state_key, [word["id"] for word in eligible_words])
+        selected_word_id = bandit.select(bandit_key, [word["id"] for word in eligible_words])
         selected_word = next(word for word in eligible_words if word["id"] == selected_word_id)
 
         session.ask_counts[selected_word_id] = session.ask_counts.get(selected_word_id, 0) + 1

@@ -26,14 +26,17 @@ class FakeSupabase:
         return self.words
 
     def load_q_values(self, token, user_id, state_key):
-        return self.q_values.get(state_key, {})
+        return self.q_values.get(self._state_tuple(state_key), {})
 
     def load_word_stats(self, token, user_id, word_id):
         return self.stats.get(word_id)
 
     def upsert_q_value(self, token, user_id, word_id, state_key, q_value):
         self.saved_q_values.append((word_id, state_key, q_value))
-        self.q_values.setdefault(state_key, {})[word_id] = q_value
+        self.q_values.setdefault(self._state_tuple(state_key), {})[word_id] = q_value
+
+    def _state_tuple(self, state_key):
+        return (state_key["wrong_streak"], state_key["correct_streak"])
 
     def upsert_word_stats(self, token, payload):
         self.saved_stats.append(payload)
@@ -132,7 +135,7 @@ class GameServiceTest(unittest.TestCase):
     def test_optimistic_initialization_prefers_untried_words(self):
         fake = FakeSupabase()
         fake.q_values = {
-            "wrong:false|correct:false": {
+            (False, False): {
                 "one": 0.2,
                 "two": 0.1,
             }
