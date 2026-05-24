@@ -81,11 +81,14 @@ export default function ProfilePage() {
       </div>
 
       <div className="flex-1 px-6 pb-12 pt-4 max-w-md w-full mx-auto">
-        <div className="flex flex-col items-center mt-4">
-          <StudyCat className="mb-8 scale-[1.35]" />
+        <div className="flex flex-col items-center mt-6 text-center">
+          <div className="mb-16 flex h-24 w-full items-center justify-center">
+            <StudyCat className="scale-[1.35]" />
+          </div>
 
           {/* Name */}
-          <div className="w-full flex flex-col items-center">
+          <div className="w-full flex flex-col items-center justify-center">
+            <span className="mb-2 font-body tracking-ui text-muted-foreground">Lock in</span>
             {editingName ? (
               <div className="flex items-center gap-2 w-full max-w-xs">
                 <input
@@ -110,14 +113,14 @@ export default function ProfilePage() {
                   setNameDraft(profile.display_name ?? "");
                   setEditingName(true);
                 }}
-                className="group flex items-center gap-2"
+                className="group grid w-full grid-cols-[1fr_auto_1fr] items-center"
               >
-                <span className="font-display text-2xl text-foreground">
+                <span className="col-start-2 font-display text-2xl text-foreground">
                   {profile.display_name}
                 </span>
                 <Pencil
                   size={14}
-                  className="text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="col-start-3 ml-2 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100"
                 />
               </button>
             )}
