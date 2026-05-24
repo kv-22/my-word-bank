@@ -4,6 +4,7 @@ import { ArrowLeft, Check, Pencil } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import StudyCat from "@/components/StudyCat";
 
 interface Profile {
   display_name: string | null;
@@ -81,6 +82,8 @@ export default function ProfilePage() {
 
       <div className="flex-1 px-6 pb-12 pt-4 max-w-md w-full mx-auto">
         <div className="flex flex-col items-center mt-4">
+          <StudyCat className="mb-8 scale-[1.35]" />
+
           {/* Name */}
           <div className="w-full flex flex-col items-center">
             {editingName ? (

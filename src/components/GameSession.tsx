@@ -6,6 +6,7 @@ import {
   GameSummary,
   startGameSession,
 } from "@/lib/banditApi";
+import StudyCat from "@/components/StudyCat";
 
 interface GameSessionProps {
   onDone: () => void;
@@ -231,47 +232,7 @@ export default function GameSession({ onDone }: GameSessionProps) {
 
       <div className="flex flex-1 flex-col items-center justify-center text-center">
         <div className="w-12 h-1 bg-primary/30 rounded-full mb-6" />
-        <div
-          className={`cat-celebration mb-9 ${shouldClap ? "is-clapping" : ""}`}
-          aria-label={
-            correctStreak > 0
-              ? `Study cat with ${correctStreak} correct answer streak`
-              : "Study cat"
-          }
-          role="img"
-        >
-          <div className="cat-bulbs" aria-hidden="true">
-            {Array.from({ length: streakBulbs }, (_, index) => (
-              <span
-                key={index}
-                className="cat-bulb"
-                style={{ animationDelay: `${index * 0.08}s` }}
-              >
-                💡
-              </span>
-            ))}
-            {correctStreak > MAX_STREAK_BULBS && (
-              <span className="cat-streak-count">+{correctStreak - MAX_STREAK_BULBS}</span>
-            )}
-          </div>
-          <div className="cat-tail" />
-          <div className="cat-ear cat-ear-left" />
-          <div className="cat-ear cat-ear-right" />
-          <div className="cat-head">
-            <span className="cat-eye cat-eye-left" />
-            <span className="cat-eye cat-eye-right" />
-            <span className="cat-nose" />
-            <span className="cat-mouth" />
-            <span className="cat-whisker cat-whisker-left-one" />
-            <span className="cat-whisker cat-whisker-left-two" />
-            <span className="cat-whisker cat-whisker-right-one" />
-            <span className="cat-whisker cat-whisker-right-two" />
-          </div>
-          <div className="cat-body">
-            <span className="cat-paw cat-paw-left" />
-            <span className="cat-paw cat-paw-right" />
-          </div>
-        </div>
+        <StudyCat correctStreak={correctStreak} clapping={shouldClap} className="mb-9" />
         <p className="font-display text-5xl sm:text-7xl md:text-8xl font-bold text-foreground leading-tight">
           {round.word}
         </p>
