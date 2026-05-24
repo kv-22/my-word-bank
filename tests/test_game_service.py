@@ -22,6 +22,7 @@ class FakeSupabase:
         self.load_all_q_values_calls = []
         self.load_q_values_calls = []
         self.load_word_stats_calls = []
+        self.profile_score = 0
 
     def get_user(self, token):
         return {"id": "user-1"}
@@ -48,6 +49,7 @@ class FakeSupabase:
 
     def record_answer(self, token, payload):
         self.record_answer_calls.append(payload)
+        self.profile_score += 1 if payload["p_last_result"] else -1
         state_key = {
             "wrong_streak": payload["p_wrong_streak"],
             "correct_streak": payload["p_correct_streak"],
@@ -98,6 +100,15 @@ def answer_current_round(service, session_id, token="token"):
     session = service.sessions[session_id]
     word_id = session.current_round["wordId"]
     return service.answer(token, session_id, word_id, word_id)
+
+
+def answer_current_round_wrong(service, session_id, token="token"):
+    session = service.sessions[session_id]
+    word_id = session.current_round["wordId"]
+    wrong_option = next(
+        option for option in session.current_round["options"] if option["wordId"] != word_id
+    )
+    return service.answer(token, session_id, word_id, wrong_option["wordId"])
 
 
 class GameServiceTest(unittest.TestCase):
@@ -216,6 +227,21 @@ class GameServiceTest(unittest.TestCase):
         self.assertTrue(fake.saved_q_values)
         self.assertTrue(fake.saved_stats)
         self.assertEqual(len(fake.record_answer_calls), 1)
+
+    def test_answer_updates_profile_score_by_correctness(self):
+        fake = FakeSupabase()
+        service = GameService(fake)
+        started = service.start_session("token")
+        session_id = started["sessionId"]
+
+        answer_current_round(service, session_id)
+        answer_current_round_wrong(service, session_id)
+
+        self.assertEqual(fake.profile_score, 0)
+        self.assertEqual(
+            [call["p_last_result"] for call in fake.record_answer_calls],
+            [True, False],
+        )
 
     def test_session_loads_all_q_values_once(self):
         fake = FakeSupabase()
