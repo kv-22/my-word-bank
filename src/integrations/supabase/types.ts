@@ -145,8 +145,6 @@ export type Database = {
       }
       profiles: {
         Row: {
-          avatar_seed: string
-          avatar_style: string
           created_at: string
           display_name: string | null
           id: string
@@ -155,8 +153,6 @@ export type Database = {
           user_id: string
         }
         Insert: {
-          avatar_seed?: string
-          avatar_style?: string
           created_at?: string
           display_name?: string | null
           id?: string
@@ -165,8 +161,6 @@ export type Database = {
           user_id: string
         }
         Update: {
-          avatar_seed?: string
-          avatar_style?: string
           created_at?: string
           display_name?: string | null
           id?: string
