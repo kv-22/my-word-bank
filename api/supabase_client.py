@@ -75,6 +75,25 @@ class SupabaseClient:
         rows = self._request("GET", f"/rest/v1/bandit_q_values?{query}", token)
         return {row["word_id"]: float(row["q_value"]) for row in rows}
 
+    def load_all_q_values(self, token: str, user_id: str) -> dict[tuple[bool, bool], dict[str, float]]:
+        query = urlencode(
+            {
+                "select": "word_id,q_value,wrong_streak,correct_streak",
+                "user_id": f"eq.{user_id}",
+            }
+        )
+        rows = self._request("GET", f"/rest/v1/bandit_q_values?{query}", token)
+        q_values: dict[tuple[bool, bool], dict[str, float]] = {
+            (False, False): {},
+            (False, True): {},
+            (True, False): {},
+            (True, True): {},
+        }
+        for row in rows:
+            state_tuple = (bool(row["wrong_streak"]), bool(row["correct_streak"]))
+            q_values[state_tuple][row["word_id"]] = float(row["q_value"])
+        return q_values
+
     def load_word_stats(self, token: str, user_id: str, word_id: str) -> dict[str, Any] | None:
         query = urlencode(
             {
