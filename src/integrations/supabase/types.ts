@@ -143,6 +143,39 @@ export type Database = {
           },
         ]
       }
+      profiles: {
+        Row: {
+          avatar_seed: string
+          avatar_style: string
+          created_at: string
+          display_name: string | null
+          id: string
+          score: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_seed?: string
+          avatar_style?: string
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          score?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_seed?: string
+          avatar_style?: string
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          score?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       words: {
         Row: {
           created_at: string
