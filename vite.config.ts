@@ -27,8 +27,8 @@ export default defineConfig(({ mode }) => ({
         skipWaiting: true,
       },
       manifest: {
-        name: "Ostracon",
-        short_name: "Ostracon",
+        name: "My Word Bank",
+        short_name: "My Word Bank",
         description: "Your personal lexicon",
         theme_color: "#f5f0e8",
         background_color: "#f5f0e8",

@@ -169,7 +169,7 @@ const Index = () => {
         <div className="flex flex-col items-center justify-center flex-1 px-6">
           <div className="w-16 h-1 bg-primary rounded-full mb-8" />
           <h1 className="font-display text-4xl sm:text-6xl font-bold text-foreground text-center">
-            Ostracon
+            My Word Bank
           </h1>
           <p className="mt-4 font-body tracking-ui text-secondary">
             Your personal lexicon
