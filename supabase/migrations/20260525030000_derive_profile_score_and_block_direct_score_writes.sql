@@ -130,6 +130,13 @@ CREATE POLICY "Users can insert their own profile"
   TO authenticated
   WITH CHECK (auth.uid() = user_id AND score = 0);
 
+DROP POLICY IF EXISTS "Users can update their own profile" ON public.profiles;
+CREATE POLICY "Users can update their own profile"
+  ON public.profiles FOR UPDATE
+  TO authenticated
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
+
 CREATE OR REPLACE FUNCTION public.prevent_user_profile_score_change()
 RETURNS TRIGGER
 LANGUAGE plpgsql
