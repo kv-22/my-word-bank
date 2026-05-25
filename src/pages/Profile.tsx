@@ -68,7 +68,7 @@ export default function ProfilePage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-background select-none">
-      <div className="flex items-center justify-between px-6 pt-[max(1rem,env(safe-area-inset-top))]">
+      <div className="grid grid-cols-[2.25rem_1fr_2.25rem] items-center px-6 pt-[max(1rem,env(safe-area-inset-top))]">
         <button
           onClick={() => navigate("/")}
           className="text-muted-foreground hover:text-foreground transition-[color,transform] duration-150 ease-out active:scale-[0.98] p-2 rounded-md"
@@ -76,7 +76,7 @@ export default function ProfilePage() {
         >
           <ArrowLeft size={18} />
         </button>
-        <span className="font-body tracking-ui text-muted-foreground">Profile</span>
+        <span className="text-center font-body tracking-ui text-muted-foreground">Profile</span>
         <div className="w-9" />
       </div>
 
@@ -90,14 +90,15 @@ export default function ProfilePage() {
           <div className="w-full flex flex-col items-center justify-center">
             <span className="mb-2 font-body tracking-ui text-muted-foreground">Keep going</span>
             {editingName ? (
-              <div className="flex items-center gap-2 w-full max-w-xs">
+              <div className="grid w-full max-w-xs grid-cols-[2rem_minmax(0,1fr)_2rem] items-center gap-2">
+                <span aria-hidden="true" />
                 <input
                   autoFocus
                   value={nameDraft}
                   onChange={(e) => setNameDraft(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && saveName()}
                   placeholder="Your name"
-                  className="flex-1 bg-transparent border-b border-border focus:border-primary outline-none font-display text-2xl text-center pb-1 transition-colors"
+                  className="min-w-0 bg-transparent border-b border-border focus:border-primary outline-none font-display text-2xl text-center pb-1 transition-colors"
                 />
                 <button
                   onClick={saveName}
