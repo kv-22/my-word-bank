@@ -39,7 +39,7 @@ export default function Auth() {
     <div className="relative flex min-h-[100dvh] flex-col items-center justify-center overflow-y-auto bg-background px-6 py-[max(1.5rem,env(safe-area-inset-top))] pb-[max(1.5rem,env(safe-area-inset-bottom))]">
       <div className="w-16 h-1 bg-primary rounded-full mb-8" />
       <h1 className="font-display text-4xl sm:text-5xl font-bold text-foreground mb-2">
-        Ostracon
+        My Word Bank
       </h1>
       <p className="font-body tracking-ui text-muted-foreground mb-10">
         Your personal lexicon
