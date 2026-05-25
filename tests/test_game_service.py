@@ -49,7 +49,6 @@ class FakeSupabase:
 
     def record_answer(self, token, payload):
         self.record_answer_calls.append(payload)
-        self.profile_score += 1 if payload["p_last_result"] else -1
         state_key = {
             "wrong_streak": payload["p_wrong_streak"],
             "correct_streak": payload["p_correct_streak"],
@@ -228,7 +227,7 @@ class GameServiceTest(unittest.TestCase):
         self.assertTrue(fake.saved_stats)
         self.assertEqual(len(fake.record_answer_calls), 1)
 
-    def test_answer_updates_profile_score_by_correctness(self):
+    def test_answer_records_correctness_without_updating_profile_score(self):
         fake = FakeSupabase()
         service = GameService(fake)
         started = service.start_session("token")
