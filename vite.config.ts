@@ -27,9 +27,9 @@ export default defineConfig(({ mode }) => ({
         skipWaiting: true,
       },
       manifest: {
-        name: "My Word Bank",
-        short_name: "My Word Bank",
-        description: "Your personal lexicon",
+        name: "Word Bank",
+        short_name: "Word Bank",
+        description: "A personal lexicon",
         theme_color: "#f5f0e8",
         background_color: "#f5f0e8",
         display: "standalone",
