@@ -88,7 +88,7 @@ export default function ProfilePage() {
 
           {/* Name */}
           <div className="w-full flex flex-col items-center justify-center">
-            <span className="mb-2 font-body tracking-ui text-muted-foreground">Lock in</span>
+            <span className="mb-2 font-body tracking-ui text-muted-foreground">Keep going</span>
             {editingName ? (
               <div className="flex items-center gap-2 w-full max-w-xs">
                 <input
