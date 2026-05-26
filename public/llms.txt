@@ -1,0 +1,7 @@
+# Word Bank
+
+> Word Bank is a personal lexicon app for collecting English vocabulary, writing your own definitions, and practicing recall through playful sessions.
+
+## Pages
+
+- [Home](/): Sign in to browse your saved words, add new ones, and play recall sessions.

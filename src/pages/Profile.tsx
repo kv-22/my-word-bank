@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { ArrowLeft, Check, Pencil } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -83,7 +84,16 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-background select-none">
+    <main className="flex flex-col min-h-screen bg-background select-none">
+      <Helmet>
+        <title>Profile — Word Bank</title>
+        <meta name="description" content="View your Word Bank profile, edit your display name, and track your vocabulary practice score." />
+        <link rel="canonical" href="/profile" />
+        <meta property="og:title" content="Profile — Word Bank" />
+        <meta property="og:description" content="Your Word Bank profile and practice score." />
+        <meta property="og:url" content="/profile" />
+      </Helmet>
+      <h1 className="sr-only">Profile — Word Bank</h1>
       <div className="grid grid-cols-[2.25rem_1fr_2.25rem] items-center px-6 pt-[max(1rem,env(safe-area-inset-top))]">
         <button
           onClick={() => navigate("/")}
@@ -108,12 +118,15 @@ export default function ProfilePage() {
             {editingName ? (
               <div className="grid w-full max-w-xs grid-cols-[2rem_minmax(0,1fr)_2rem] items-center gap-2">
                 <span aria-hidden="true" />
+                <label htmlFor="profile-display-name" className="sr-only">Display name</label>
                 <input
+                  id="profile-display-name"
                   autoFocus
                   value={nameDraft}
                   onChange={(e) => setNameDraft(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && saveName()}
                   placeholder="Your name"
+                  aria-label="Display name"
                   className="min-w-0 bg-transparent border-b border-border focus:border-primary outline-none font-display text-2xl text-center pb-1 transition-colors"
                 />
                 <button
@@ -152,6 +165,6 @@ export default function ProfilePage() {
           </div>
         </div>
       </div>
-    </div>
+    </main>
   );
 }
