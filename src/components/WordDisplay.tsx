@@ -45,13 +45,13 @@ export default function WordDisplay({ entry, isNew, onEdit }: WordDisplayProps) 
   return (
     <div className="flex flex-col items-center justify-center text-center px-6">
       <div className="w-12 h-1 bg-primary/30 rounded-full mb-6" />
-      <h2
+      <h1
         className={`font-display text-5xl sm:text-7xl md:text-8xl font-bold text-foreground leading-tight ${
           isNew ? "animate-ink-soak" : ""
         }`}
       >
         {entry.word}
-      </h2>
+      </h1>
 
       {entry.partOfSpeech && (
         <span
@@ -90,7 +90,6 @@ export default function WordDisplay({ entry, isNew, onEdit }: WordDisplayProps) 
               onChange={(e) => setDraft(e.target.value)}
               rows={1}
               autoFocus
-              aria-label="Edit definition"
               className="w-full min-h-0 max-h-[min(50vh,14rem)] overflow-y-auto bg-transparent font-body text-base text-foreground text-center border-b border-border focus:border-accent focus:outline-none resize-none leading-relaxed"
             />
           </div>

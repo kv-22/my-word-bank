@@ -107,18 +107,16 @@ export default function UnifiedInput({
 
       {showDefinitionInput && (
         <div className="px-6 pt-5 pb-3 transition-all duration-300">
-          <label htmlFor="word-definition" className="font-body tracking-ui text-muted-foreground mb-2 block">
+          <label className="font-body tracking-ui text-muted-foreground mb-2 block">
             Definition
           </label>
           <textarea
-            id="word-definition"
             value={definition}
             onChange={(e) => setDefinition(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="What does this word mean to you?"
-            aria-label="Definition"
             rows={3}
-            className="w-full bg-transparent font-body text-base text-foreground placeholder:text-muted-foreground resize-none focus:outline-none leading-relaxed"
+            className="w-full bg-transparent font-body text-base text-foreground placeholder:text-muted-foreground/50 resize-none focus:outline-none leading-relaxed"
           />
           <div className="flex justify-end mt-2">
             <button
@@ -133,15 +131,12 @@ export default function UnifiedInput({
       )}
 
       <div className="flex items-center px-6 py-5">
-        <label htmlFor="word-search" className="sr-only">Search or add a word</label>
         <input
-          id="word-search"
           type="text"
           value={query}
           onChange={(e) => handleInputChange(e.target.value)}
           placeholder="Type a word"
-          aria-label="Search or add a word"
-          className="flex-1 bg-transparent font-display text-2xl sm:text-3xl text-foreground placeholder:text-muted-foreground focus:outline-none caret-accent"
+          className="flex-1 bg-transparent font-display text-2xl sm:text-3xl text-foreground placeholder:text-muted-foreground/40 focus:outline-none caret-accent"
         />
         {query.trim() && !showDefinitionInput && !wordFound && matches.length === 0 && (
           <span className="font-body tracking-ui text-muted-foreground ml-4 shrink-0">
