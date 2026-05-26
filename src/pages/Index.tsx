@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { loadLexicon, searchWords, addWord, updateDefinition, WordEntry } from "@/lib/lexicon";
 import { useAuth } from "@/contexts/AuthContext";
 import UnifiedInput from "@/components/UnifiedInput";
@@ -112,7 +113,16 @@ const Index = () => {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-background select-none">
+    <main className="flex flex-col h-screen bg-background select-none">
+      <Helmet>
+        <title>Word Bank — Your personal lexicon</title>
+        <meta name="description" content="Collect new English words, define them in your own voice, and practice recall with playful daily sessions inside your Word Bank." />
+        <link rel="canonical" href="/" />
+        <meta property="og:title" content="Word Bank — Your personal lexicon" />
+        <meta property="og:description" content="Save words, write your own definitions, and build vocabulary recall through play." />
+        <meta property="og:url" content="/" />
+      </Helmet>
+      <h1 className="sr-only">Word Bank — Your personal lexicon</h1>
       {/* Header with toggle and sign out */}
       <div className="flex justify-between items-center px-6 pt-[max(1rem,env(safe-area-inset-top))]">
         <button
@@ -168,9 +178,9 @@ const Index = () => {
       {appMode === "lexicon" && view === "idle" && lexicon.length === 0 && (
         <div className="flex flex-col items-center justify-center flex-1 px-6">
           <div className="w-16 h-1 bg-primary rounded-full mb-8" />
-          <h1 className="font-display text-4xl sm:text-6xl font-bold text-foreground text-center">
+          <h2 className="font-display text-4xl sm:text-6xl font-bold text-foreground text-center">
             Word Bank
-          </h1>
+          </h2>
           <p className="mt-4 font-body tracking-ui text-secondary">
             A personal lexicon
           </p>
@@ -244,7 +254,7 @@ const Index = () => {
           wordFound={view === "found"}
         />
       )}
-    </div>
+    </main>
   );
 };
 
