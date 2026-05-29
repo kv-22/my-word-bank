@@ -1,0 +1,5 @@
+# Word Bank
+
+> A personal lexicon and vocabulary archive. Collect new words, define them in your own voice, and build recall through browsing and playful practice.
+
+Word Bank is a cloud-synced English vocabulary PWA designed for learners who want to curate their own word collections. Users add words, write personal definitions, and review them through card-based browsing and list views.
