@@ -9,20 +9,7 @@ ACTIONS = ["apple", "banana", "orange"] # DUMMY FOR NOW, SHOULD ACTUALLY BE THE 
 
 agent = MultiArmedBandit(alpha=ALPHA, epsilon=EPSILON)
 
-context = {
-    "wrong_streak": 0,
-    "correct_streak": 0,
-}
-
-
-def make_state_key(state):
-    return (
-        bool(state["wrong_streak"]),
-        bool(state["correct_streak"]),
-    )
-
-
-def run_session(agent, state, actions):
+def run_session(agent, actions):
     agent.reset()
 
     times_selected = defaultdict(int)
@@ -39,8 +26,7 @@ def run_session(agent, state, actions):
     start = True
     
     for _ in range(episode_length):
-        state_key = make_state_key(state)
-        action = agent.select(state_key, actions)
+        action = agent.select(actions)
         
         # simulate the action :o answer 
         answer = None
@@ -51,7 +37,6 @@ def run_session(agent, state, actions):
                 correct += 1
             else:
                 correct = 1
-                state["correct_streak"] = False
                 
             times_correct[action] = times_correct[action] + 1
             reward += 1  # reward of 1 if they get it right 
@@ -63,7 +48,6 @@ def run_session(agent, state, actions):
                 wrong += 1
             else: 
                 wrong = 1
-                state["wrong_streak"] = False
                 
             times_wrong[action] = times_wrong[action] + 1
             reward += 5 # reward od 5 if they get it wrong (good choice as they haven't learnt it)
@@ -82,15 +66,9 @@ def run_session(agent, state, actions):
         previous = answer
         start = False
         
-        if correct >= 3:
-            state["correct_streak"] = True
-        if wrong >= 3:
-            state["wrong_streak"] = True
-        
-        
-        delta = (reward / times_selected[action]) - (agent.get_q_value(state_key, action) / times_selected[action])
+        delta = (reward / times_selected[action]) - (agent.get_q_value(action) / times_selected[action])
 
-        agent.update_table(state_key, action, delta)
+        agent.update_table(action, delta)
 
 
     print(episode_rewards)

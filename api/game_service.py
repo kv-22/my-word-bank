@@ -21,21 +21,14 @@ class SessionState:
     token: str
     words: list[dict]
     ask_counts: dict[str, int] = field(default_factory=dict)
-    q_values_by_state: dict[tuple[bool, bool], dict[str, float]] = field(default_factory=dict)
+    q_values: dict[str, float] = field(default_factory=dict)
     word_stats: dict[str, dict | None] = field(default_factory=dict)
     previous_word_id: str | None = None
     current_round: dict | None = None
     correct_streak_count: int = 0
-    wrong_streak_count: int = 0
     answered: int = 0
     correct: int = 0
     wrong: int = 0
-
-    def state_key(self) -> dict[str, bool]:
-        return {
-            "wrong_streak": self.wrong_streak_count >= 3,
-            "correct_streak": self.correct_streak_count >= 3,
-        }
 
     def summary(self) -> dict:
         return {
@@ -44,20 +37,6 @@ class SessionState:
             "wrong": self.wrong,
             "correctStreak": self.correct_streak_count,
         }
-
-
-def bandit_state_key(state_key: dict[str, bool]) -> tuple[bool, bool]:
-    return (state_key["wrong_streak"], state_key["correct_streak"])
-
-
-def empty_q_values_by_state() -> dict[tuple[bool, bool], dict[str, float]]:
-    return {
-        (False, False): {},
-        (False, True): {},
-        (True, False): {},
-        (True, True): {},
-    }
-
 
 class GameService:
     def __init__(self, supabase):
@@ -77,7 +56,7 @@ class GameService:
             user_id=user_id,
             token=token,
             words=words,
-            q_values_by_state=self._load_all_q_values(token, user_id),
+            q_values=self.supabase.load_q_values(token, user_id),
         )
         self.sessions[session_id] = session
         round_payload = self._next_round(session)
@@ -97,12 +76,10 @@ class GameService:
 
         correct_option_word_id = word_id
         is_correct = selected_option_word_id == correct_option_word_id
-        state_key = session.state_key()
         stats = self._word_stats(session, word_id)
         reward = self._calculate_reward(is_correct, stats)
 
-        q_values = self._q_values(session, state_key)
-        old_q = q_values.get(word_id, OPTIMISTIC_INITIAL_Q)
+        old_q = session.q_values.get(word_id, OPTIMISTIC_INITIAL_Q)
         
         new_q = old_q + (ALPHA * (reward - old_q))
         updated_stats = self._updated_stats_payload(session.user_id, word_id, is_correct, stats)
@@ -111,15 +88,9 @@ class GameService:
         if is_correct:
             session.correct += 1
             session.correct_streak_count += 1
-            session.wrong_streak_count = 0
         else:
             session.wrong += 1
-            session.wrong_streak_count += 1
             session.correct_streak_count = 0
-        
-        # print(session.correct_streak_count)
-        # print(session.wrong_streak_count)
-
         self.supabase.record_answer(
             token,
             {
@@ -127,8 +98,6 @@ class GameService:
                 "p_session_id": session_id,
                 "p_reward": reward,
                 "p_q_value": new_q,
-                "p_wrong_streak": state_key["wrong_streak"],
-                "p_correct_streak": state_key["correct_streak"],
                 "p_times_selected": updated_stats["times_selected"],
                 "p_times_correct": updated_stats["times_correct"],
                 "p_times_wrong": updated_stats["times_wrong"],
@@ -136,7 +105,7 @@ class GameService:
                 "p_last_answered_at": updated_stats["last_answered_at"],
             },
         )
-        q_values[word_id] = new_q
+        session.q_values[word_id] = new_q
         session.word_stats[word_id] = updated_stats
 
         next_round = self._next_round(session)
@@ -186,16 +155,13 @@ class GameService:
             session.current_round = None
             return None
 
-        state_key = session.state_key()
-        bandit_key = bandit_state_key(state_key)
-        q_values = self._q_values(session, state_key)
         table = {
-            (bandit_key, word["id"]): q_values.get(word["id"], OPTIMISTIC_INITIAL_Q)
+            word["id"]: session.q_values.get(word["id"], OPTIMISTIC_INITIAL_Q)
             for word in eligible_words
         }
         # print(table)
         bandit = MultiArmedBandit(alpha=ALPHA, epsilon=EPSILON, table=table)
-        selected_word_id = bandit.select(bandit_key, [word["id"] for word in eligible_words])
+        selected_word_id = bandit.select([word["id"] for word in eligible_words])
         selected_word = next(word for word in eligible_words if word["id"] == selected_word_id)
 
         session.ask_counts[selected_word_id] = session.ask_counts.get(selected_word_id, 0) + 1
@@ -224,18 +190,6 @@ class GameService:
             "word": selected_word["word"],
             "options": options,
         }
-
-    def _q_values(self, session: SessionState, state_key: dict[str, bool]) -> dict[str, float]:
-        state_tuple = bandit_state_key(state_key)
-        return session.q_values_by_state.setdefault(state_tuple, {})
-
-    def _load_all_q_values(self, token: str, user_id: str) -> dict[tuple[bool, bool], dict[str, float]]:
-        if hasattr(self.supabase, "load_all_q_values"):
-            loaded = self.supabase.load_all_q_values(token, user_id)
-            q_values = empty_q_values_by_state()
-            q_values.update(loaded)
-            return q_values
-        return empty_q_values_by_state()
 
     def _word_stats(self, session: SessionState, word_id: str) -> dict | None:
         if word_id not in session.word_stats:

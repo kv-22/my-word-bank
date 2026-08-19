@@ -63,36 +63,15 @@ class SupabaseClient:
         rows = self._request("GET", f"/rest/v1/words?{query}", token)
         return [row for row in rows if row.get("definition", "").strip()]
 
-    def load_q_values(self, token: str, user_id: str, state_key: dict[str, bool]) -> dict[str, float]:
+    def load_q_values(self, token: str, user_id: str) -> dict[str, float]:
         query = urlencode(
             {
                 "select": "word_id,q_value",
                 "user_id": f"eq.{user_id}",
-                "wrong_streak": f"eq.{str(state_key['wrong_streak']).lower()}",
-                "correct_streak": f"eq.{str(state_key['correct_streak']).lower()}",
             }
         )
         rows = self._request("GET", f"/rest/v1/bandit_q_values?{query}", token)
         return {row["word_id"]: float(row["q_value"]) for row in rows}
-
-    def load_all_q_values(self, token: str, user_id: str) -> dict[tuple[bool, bool], dict[str, float]]:
-        query = urlencode(
-            {
-                "select": "word_id,q_value,wrong_streak,correct_streak",
-                "user_id": f"eq.{user_id}",
-            }
-        )
-        rows = self._request("GET", f"/rest/v1/bandit_q_values?{query}", token)
-        q_values: dict[tuple[bool, bool], dict[str, float]] = {
-            (False, False): {},
-            (False, True): {},
-            (True, False): {},
-            (True, True): {},
-        }
-        for row in rows:
-            state_tuple = (bool(row["wrong_streak"]), bool(row["correct_streak"]))
-            q_values[state_tuple][row["word_id"]] = float(row["q_value"])
-        return q_values
 
     def load_word_stats(self, token: str, user_id: str, word_id: str) -> dict[str, Any] | None:
         query = urlencode(
@@ -119,10 +98,9 @@ class SupabaseClient:
         token: str,
         user_id: str,
         word_id: str,
-        state_key: dict[str, bool],
         q_value: float,
     ) -> None:
-        query = urlencode({"on_conflict": "user_id,word_id,wrong_streak,correct_streak"})
+        query = urlencode({"on_conflict": "user_id,word_id"})
         self._request(
             "POST",
             f"/rest/v1/bandit_q_values?{query}",
@@ -130,8 +108,6 @@ class SupabaseClient:
             {
                 "user_id": user_id,
                 "word_id": word_id,
-                "wrong_streak": state_key["wrong_streak"],
-                "correct_streak": state_key["correct_streak"],
                 "q_value": q_value,
             },
             prefer="resolution=merge-duplicates",

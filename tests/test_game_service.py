@@ -19,7 +19,6 @@ class FakeSupabase:
         self.saved_stats = []
         self.saved_answer_logs = []
         self.record_answer_calls = []
-        self.load_all_q_values_calls = []
         self.load_q_values_calls = []
         self.load_word_stats_calls = []
         self.profile_score = 0
@@ -30,18 +29,9 @@ class FakeSupabase:
     def load_playable_words(self, token):
         return self.words
 
-    def load_q_values(self, token, user_id, state_key):
-        self.load_q_values_calls.append(self._state_tuple(state_key))
-        return self.q_values.get(self._state_tuple(state_key), {})
-
-    def load_all_q_values(self, token, user_id):
-        self.load_all_q_values_calls.append(user_id)
-        return {
-            (False, False): dict(self.q_values.get((False, False), {})),
-            (False, True): dict(self.q_values.get((False, True), {})),
-            (True, False): dict(self.q_values.get((True, False), {})),
-            (True, True): dict(self.q_values.get((True, True), {})),
-        }
+    def load_q_values(self, token, user_id):
+        self.load_q_values_calls.append(user_id)
+        return dict(self.q_values)
 
     def load_word_stats(self, token, user_id, word_id):
         self.load_word_stats_calls.append(word_id)
@@ -49,10 +39,6 @@ class FakeSupabase:
 
     def record_answer(self, token, payload):
         self.record_answer_calls.append(payload)
-        state_key = {
-            "wrong_streak": payload["p_wrong_streak"],
-            "correct_streak": payload["p_correct_streak"],
-        }
         updated_stats = {
             "user_id": "user-1",
             "word_id": payload["p_word_id"],
@@ -74,18 +60,14 @@ class FakeSupabase:
             token,
             "user-1",
             payload["p_word_id"],
-            state_key,
             payload["p_q_value"],
         )
         self.upsert_word_stats(token, updated_stats)
         self.insert_answer_log(token, answer_log)
 
-    def upsert_q_value(self, token, user_id, word_id, state_key, q_value):
-        self.saved_q_values.append((word_id, state_key, q_value))
-        self.q_values.setdefault(self._state_tuple(state_key), {})[word_id] = q_value
-
-    def _state_tuple(self, state_key):
-        return (state_key["wrong_streak"], state_key["correct_streak"])
+    def upsert_q_value(self, token, user_id, word_id, q_value):
+        self.saved_q_values.append((word_id, q_value))
+        self.q_values[word_id] = q_value
 
     def upsert_word_stats(self, token, payload):
         self.saved_stats.append(payload)
@@ -113,18 +95,18 @@ def answer_current_round_wrong(service, session_id, token="token"):
 class GameServiceTest(unittest.TestCase):
     def test_bandit_updates_q_value(self):
         bandit = MultiArmedBandit(alpha=0.1, epsilon=0)
-        bandit.update_table("state", "word", 5)
+        bandit.update_table("word", 5)
 
-        self.assertEqual(bandit.get_q_value("state", "word"), 0.5)
+        self.assertEqual(bandit.get_q_value("word"), 0.5)
 
     def test_bandit_selects_best_action(self):
         table = {
-            ("state", "low"): 0.25,
-            ("state", "high"): 1.5,
+            "low": 0.25,
+            "high": 1.5,
         }
         bandit = MultiArmedBandit(alpha=0.1, epsilon=0, table=table)
 
-        self.assertEqual(bandit.select("state", ["low", "high"]), "high")
+        self.assertEqual(bandit.select(["low", "high"]), "high")
 
     def test_reward_calculation(self):
         service = GameService(FakeSupabase())
@@ -193,10 +175,8 @@ class GameServiceTest(unittest.TestCase):
     def test_optimistic_initialization_prefers_untried_words(self):
         fake = FakeSupabase()
         fake.q_values = {
-            (False, False): {
-                "one": 0.2,
-                "two": 0.1,
-            }
+            "one": 0.2,
+            "two": 0.1,
         }
         service = GameService(fake)
 
@@ -242,7 +222,7 @@ class GameServiceTest(unittest.TestCase):
             [True, False],
         )
 
-    def test_session_loads_all_q_values_once(self):
+    def test_session_loads_q_values_once(self):
         fake = FakeSupabase()
         service = GameService(fake)
         started = service.start_session("token")
@@ -250,8 +230,7 @@ class GameServiceTest(unittest.TestCase):
 
         answer_current_round(service, session_id)
 
-        self.assertEqual(fake.load_all_q_values_calls, ["user-1"])
-        self.assertEqual(fake.load_q_values_calls, [])
+        self.assertEqual(fake.load_q_values_calls, ["user-1"])
         self.assertEqual(len(fake.load_word_stats_calls), 1)
 
     def test_answer_logs_updated_count_reward_q_value_and_session(self):
