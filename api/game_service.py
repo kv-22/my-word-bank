@@ -25,6 +25,7 @@ class SessionState:
     word_stats: dict[str, dict | None] = field(default_factory=dict)
     previous_word_id: str | None = None
     current_round: dict | None = None
+    current_selection_strategy: str | None = None
     correct_streak_count: int = 0
     answered: int = 0
     correct: int = 0
@@ -97,7 +98,9 @@ class GameService:
                 "p_word_id": word_id,
                 "p_session_id": session_id,
                 "p_reward": reward,
-                "p_q_value": new_q,
+                "p_q_value_before": old_q,
+                "p_q_value_after": new_q,
+                "p_selection_strategy": session.current_selection_strategy,
                 "p_times_selected": updated_stats["times_selected"],
                 "p_times_correct": updated_stats["times_correct"],
                 "p_times_wrong": updated_stats["times_wrong"],
@@ -160,11 +163,14 @@ class GameService:
         }
         # print(table)
         bandit = MultiArmedBandit(alpha=ALPHA, epsilon=EPSILON, table=table)
-        selected_word_id = bandit.select([word["id"] for word in eligible_words])
+        selected_word_id, selection_strategy = bandit.select_with_strategy(
+            [word["id"] for word in eligible_words]
+        )
         selected_word = next(word for word in eligible_words if word["id"] == selected_word_id)
 
         session.ask_counts[selected_word_id] = session.ask_counts.get(selected_word_id, 0) + 1
         session.previous_word_id = selected_word_id
+        session.current_selection_strategy = selection_strategy
         session.current_round = self._round_payload(session, selected_word)
         return session.current_round
 

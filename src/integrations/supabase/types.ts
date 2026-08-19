@@ -19,8 +19,11 @@ export type Database = {
           answer_count: number
           created_at: string
           id: string
-          q_value: number
+          is_correct: boolean
+          q_value_after: number
+          q_value_before: number
           reward: number
+          selection_strategy: string
           session_id: string
           user_id: string
           word_id: string
@@ -29,8 +32,11 @@ export type Database = {
           answer_count: number
           created_at?: string
           id?: string
-          q_value: number
+          is_correct: boolean
+          q_value_after: number
+          q_value_before: number
           reward: number
+          selection_strategy: string
           session_id: string
           user_id: string
           word_id: string
@@ -39,8 +45,11 @@ export type Database = {
           answer_count?: number
           created_at?: string
           id?: string
-          q_value?: number
+          is_correct?: boolean
+          q_value_after?: number
+          q_value_before?: number
           reward?: number
+          selection_strategy?: string
           session_id?: string
           user_id?: string
           word_id?: string
@@ -205,8 +214,10 @@ export type Database = {
       record_bandit_answer: {
         Args: {
           p_last_result: boolean
-          p_q_value: number
+          p_q_value_after: number
+          p_q_value_before: number
           p_reward: number
+          p_selection_strategy: string
           p_session_id: string
           p_times_correct: number
           p_times_selected: number

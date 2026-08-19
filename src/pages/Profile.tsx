@@ -11,11 +11,6 @@ interface Profile {
   score: number;
 }
 
-interface BanditWordStat {
-  times_correct: number;
-  times_wrong: number;
-}
-
 export default function ProfilePage() {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -29,25 +24,14 @@ export default function ProfilePage() {
     (async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("display_name")
+        .select("display_name, score")
         .eq("user_id", user.id)
         .maybeSingle();
       if (error) {
         toast({ title: "Could not load profile", description: error.message });
       }
-      const { data: stats, error: statsError } = await supabase
-        .from("bandit_word_stats")
-        .select("times_correct, times_wrong")
-        .eq("user_id", user.id);
-      if (statsError) {
-        toast({ title: "Could not load score", description: statsError.message });
-      }
       if (data) {
-        const score = ((stats ?? []) as BanditWordStat[]).reduce(
-          (total, stat) => total + stat.times_correct - stat.times_wrong,
-          0
-        );
-        setProfile({ ...data, score });
+        setProfile(data);
         setNameDraft(data.display_name ?? "");
         if (!data.display_name) setEditingName(true);
       }

@@ -27,12 +27,16 @@ class MultiArmedBandit:
         return random.choice(best_actions)
 
     def select(self, actions):
+        action, _ = self.select_with_strategy(actions)
+        return action
+
+    def select_with_strategy(self, actions):
         if not actions:
             raise ValueError("actions must not be empty")
         # Select a random action with epsilon probability
         if random.random() < self.epsilon:
-            return random.choice(actions)
+            return random.choice(actions), "explore"
         arg_max_q = self.get_best_action(actions)
-        return arg_max_q
+        return arg_max_q, "exploit"
     
     

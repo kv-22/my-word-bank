@@ -54,16 +54,20 @@ class FakeSupabase:
             "session_id": payload["p_session_id"],
             "answer_count": payload["p_times_selected"],
             "reward": payload["p_reward"],
-            "q_value": payload["p_q_value"],
+            "is_correct": payload["p_last_result"],
+            "q_value_before": payload["p_q_value_before"],
+            "q_value_after": payload["p_q_value_after"],
+            "selection_strategy": payload["p_selection_strategy"],
         }
         self.upsert_q_value(
             token,
             "user-1",
             payload["p_word_id"],
-            payload["p_q_value"],
+            payload["p_q_value_after"],
         )
         self.upsert_word_stats(token, updated_stats)
         self.insert_answer_log(token, answer_log)
+        self.profile_score += 1 if payload["p_last_result"] else -1
 
     def upsert_q_value(self, token, user_id, word_id, q_value):
         self.saved_q_values.append((word_id, q_value))
@@ -107,6 +111,29 @@ class GameServiceTest(unittest.TestCase):
         bandit = MultiArmedBandit(alpha=0.1, epsilon=0, table=table)
 
         self.assertEqual(bandit.select(["low", "high"]), "high")
+
+    def test_bandit_reports_exploration(self):
+        bandit = MultiArmedBandit(alpha=0.1, epsilon=0.1)
+
+        with (
+            patch("game.bandit.random.random", return_value=0.05),
+            patch("game.bandit.random.choice", return_value="random"),
+        ):
+            action, strategy = bandit.select_with_strategy(["random", "other"])
+
+        self.assertEqual((action, strategy), ("random", "explore"))
+
+    def test_bandit_reports_exploitation(self):
+        bandit = MultiArmedBandit(
+            alpha=0.1,
+            epsilon=0.1,
+            table={"low": 0.25, "high": 1.5},
+        )
+
+        with patch("game.bandit.random.random", return_value=0.5):
+            action, strategy = bandit.select_with_strategy(["low", "high"])
+
+        self.assertEqual((action, strategy), ("high", "exploit"))
 
     def test_reward_calculation(self):
         service = GameService(FakeSupabase())
@@ -207,13 +234,14 @@ class GameServiceTest(unittest.TestCase):
         self.assertTrue(fake.saved_stats)
         self.assertEqual(len(fake.record_answer_calls), 1)
 
-    def test_answer_records_correctness_without_updating_profile_score(self):
+    def test_answer_updates_profile_score_from_correctness(self):
         fake = FakeSupabase()
         service = GameService(fake)
         started = service.start_session("token")
         session_id = started["sessionId"]
 
         answer_current_round(service, session_id)
+        self.assertEqual(fake.profile_score, 1)
         answer_current_round_wrong(service, session_id)
 
         self.assertEqual(fake.profile_score, 0)
@@ -248,7 +276,10 @@ class GameServiceTest(unittest.TestCase):
         self.assertEqual(log["session_id"], session_id)
         self.assertEqual(log["answer_count"], saved_stats["times_selected"])
         self.assertEqual(log["reward"], response["reward"])
-        self.assertEqual(log["q_value"], response["updatedQValue"])
+        self.assertTrue(log["is_correct"])
+        self.assertEqual(log["q_value_before"], 13.0)
+        self.assertEqual(log["q_value_after"], response["updatedQValue"])
+        self.assertIn(log["selection_strategy"], {"explore", "exploit"})
         self.assertEqual(len(fake.record_answer_calls), 1)
 
     def test_end_session_clears_active_session(self):
