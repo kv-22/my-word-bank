@@ -46,7 +46,7 @@ class FakeSupabase:
             "times_correct": payload["p_times_correct"],
             "times_wrong": payload["p_times_wrong"],
             "last_result": payload["p_last_result"],
-            "last_answered_at": payload["p_last_answered_at"],
+            "updated_at": datetime.now(timezone.utc).isoformat(),
         }
         answer_log = {
             "user_id": "user-1",
@@ -119,7 +119,7 @@ class GameServiceTest(unittest.TestCase):
         self.assertEqual(service._calculate_reward(False, None), 7)
 
         old_timestamp = (datetime.now(timezone.utc) - timedelta(days=8)).isoformat()
-        stats = {"last_result": True, "last_answered_at": old_timestamp}
+        stats = {"last_result": True, "updated_at": old_timestamp}
         self.assertEqual(service._calculate_reward(False, stats), 12)
 
     def test_candidate_generation_includes_correct_and_dedupes_definitions(self):

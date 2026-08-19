@@ -102,7 +102,6 @@ class GameService:
                 "p_times_correct": updated_stats["times_correct"],
                 "p_times_wrong": updated_stats["times_wrong"],
                 "p_last_result": updated_stats["last_result"],
-                "p_last_answered_at": updated_stats["last_answered_at"],
             },
         )
         session.q_values[word_id] = new_q
@@ -212,9 +211,9 @@ class GameService:
             reward += 1.0
         if not is_correct and stats and stats.get("last_result") is True:
             reward += 2.0
-            last_answered_at = self._parse_timestamp(stats.get("last_answered_at"))
-            if last_answered_at:
-                elapsed = datetime.now(timezone.utc) - last_answered_at
+            updated_at = self._parse_timestamp(stats.get("updated_at"))
+            if updated_at:
+                elapsed = datetime.now(timezone.utc) - updated_at
                 if elapsed.days >= 7:
                     reward += 3.0
         if not is_correct and stats and stats.get("last_result") is False:
@@ -242,7 +241,7 @@ class GameService:
             "times_correct": times_correct + (1 if is_correct else 0),
             "times_wrong": times_wrong + (0 if is_correct else 1),
             "last_result": is_correct,
-            "last_answered_at": datetime.now(timezone.utc).isoformat(),
+            "updated_at": datetime.now(timezone.utc).isoformat(),
         }
 
     def _parse_timestamp(self, value: str | None) -> datetime | None:

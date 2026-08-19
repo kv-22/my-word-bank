@@ -1,4 +1,4 @@
-- [ ] **Remove the streak-based state from the bandit for now.** Use one Q-value per user-word instead of separate Q-values for normal / correct-streak / wrong-streak states. The current reward logic does not actually implement the intended “ease off when struggling” behavior.
+- [x] **Remove the streak-based state from the bandit for now.** Use one Q-value per user-word instead of separate Q-values for normal / correct-streak / wrong-streak states. The current reward logic does not actually implement the intended “ease off when struggling” behavior.
 
 - [ ] **Keep the current bandit as the baseline.** Continue using the existing reward and epsilon-greedy selection so you have something simple to compare future changes against.
 

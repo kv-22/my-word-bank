@@ -100,7 +100,6 @@ export type Database = {
         Row: {
           created_at: string
           id: string
-          last_answered_at: string | null
           last_result: boolean | null
           times_correct: number
           times_selected: number
@@ -112,7 +111,6 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
-          last_answered_at?: string | null
           last_result?: boolean | null
           times_correct?: number
           times_selected?: number
@@ -124,7 +122,6 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
-          last_answered_at?: string | null
           last_result?: boolean | null
           times_correct?: number
           times_selected?: number
@@ -207,8 +204,6 @@ export type Database = {
     Functions: {
       record_bandit_answer: {
         Args: {
-          p_correct_streak: boolean
-          p_last_answered_at: string
           p_last_result: boolean
           p_q_value: number
           p_reward: number
@@ -217,7 +212,6 @@ export type Database = {
           p_times_selected: number
           p_times_wrong: number
           p_word_id: string
-          p_wrong_streak: boolean
         }
         Returns: undefined
       }

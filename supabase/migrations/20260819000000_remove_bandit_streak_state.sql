@@ -41,6 +41,9 @@ ALTER TABLE public.bandit_q_values
   DROP COLUMN IF EXISTS wrong_streak,
   DROP COLUMN IF EXISTS correct_streak;
 
+ALTER TABLE public.bandit_word_stats
+  DROP COLUMN IF EXISTS last_answered_at;
+
 DO $$
 BEGIN
   IF NOT EXISTS (
@@ -64,8 +67,7 @@ CREATE OR REPLACE FUNCTION public.record_bandit_answer(
   p_times_selected INTEGER,
   p_times_correct INTEGER,
   p_times_wrong INTEGER,
-  p_last_result BOOLEAN,
-  p_last_answered_at TIMESTAMP WITH TIME ZONE
+  p_last_result BOOLEAN
 )
 RETURNS void
 LANGUAGE plpgsql
@@ -152,8 +154,7 @@ BEGIN
     times_selected,
     times_correct,
     times_wrong,
-    last_result,
-    last_answered_at
+    last_result
   )
   VALUES (
     v_user_id,
@@ -161,8 +162,7 @@ BEGIN
     v_next_selected,
     v_next_correct,
     v_next_wrong,
-    p_last_result,
-    p_last_answered_at
+    p_last_result
   )
   ON CONFLICT (user_id, word_id)
   DO UPDATE SET
@@ -170,7 +170,6 @@ BEGIN
     times_correct = EXCLUDED.times_correct,
     times_wrong = EXCLUDED.times_wrong,
     last_result = EXCLUDED.last_result,
-    last_answered_at = EXCLUDED.last_answered_at,
     updated_at = now();
 
   INSERT INTO public.bandit_answer_logs (
@@ -200,8 +199,7 @@ REVOKE ALL ON FUNCTION public.record_bandit_answer(
   INTEGER,
   INTEGER,
   INTEGER,
-  BOOLEAN,
-  TIMESTAMP WITH TIME ZONE
+  BOOLEAN
 ) FROM PUBLIC, anon;
 
 GRANT EXECUTE ON FUNCTION public.record_bandit_answer(
@@ -212,6 +210,5 @@ GRANT EXECUTE ON FUNCTION public.record_bandit_answer(
   INTEGER,
   INTEGER,
   INTEGER,
-  BOOLEAN,
-  TIMESTAMP WITH TIME ZONE
+  BOOLEAN
 ) TO authenticated;
